@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip 7 — BEN'ARCADE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Black+Ops+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Outfit", "ui-sans-serif", "system-ui", "sans-serif"],
+                        mono: ["Share Tech Mono", "ui-monospace", "SFMono-Regular", "monospace"],
+                        display: ["Black Ops One", "cursive"],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#FFF9F0] text-[#4A3B28] font-sans antialiased pb-20">
+    <div id="setup-screen">
+        <header class="p-8 text-center border-b border-[#EEDDC8]">
+            <h1 class="font-display text-6xl text-[#FF6B35] tracking-tighter italic drop-shadow-sm">FLIP 7</h1>
+            <p class="font-mono text-xs tracking-[5px] text-[#8B7355] mt-2 uppercase">Risquez tout pour la victoire</p>
+        </header>
+
+        <main class="max-w-md mx-auto p-6 mt-10">
+            <div class="bg-white border-2 border-[#EEDDC8] rounded-3xl p-8 shadow-xl">
+                <h2 class="font-mono text-xs tracking-[4px] text-[#FF6B35] uppercase mb-6 flex items-center gap-2">
+                    ⚡ Les Joueurs
+                </h2>
+                <div id="player-list" class="space-y-4">
+                    <!-- Players injected here -->
+                </div>
+                <button onclick="addPlayer()" class="w-full mt-4 py-4 border-2 border-dashed border-[#EEDDC8] text-[#8B7355] font-mono text-xs hover:border-[#FF6B35] hover:text-[#FF6B35] transition-all rounded-xl">
+                    + AJOUTER UN JOUEUR
+                </button>
+                <button onclick="startGame()" class="w-full mt-10 py-5 bg-[#FF6B35] text-white font-display text-2xl rounded-2xl shadow-lg hover:bg-[#FF8B5E] hover:scale-[1.02] active:scale-100 transition-all uppercase tracking-widest">
+                    Lancer le Deck
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <header class="bg-white/90 backdrop-blur-md border-b border-[#EEDDC8] p-4 flex items-center justify-between sticky top-0 z-50">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="p-2 hover:bg-[#FFF9F0] rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-[#8B7355]"><path d="m15 18-6-6 6-6"/></svg>
+                </a>
+                <div>
+                    <h1 class="font-display text-2xl text-[#FF6B35] italic">FLIP 7</h1>
+                    <p id="round-indicator" class="font-mono text-[10px] text-[#8B7355] tracking-widest uppercase">Manche 1</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="openSettings()" class="p-2 hover:bg-[#FFF9F0] rounded-full transition-colors text-[#8B7355]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" id="gear" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <button onclick="quitGame()" class="px-4 py-2 border border-[#EEDDC8] text-[#8B7355] font-mono text-[10px] tracking-widest rounded-md hover:bg-[#FFF9F0] transition-colors uppercase">
+                    Quitter
+                </button>
+            </div>
+        </header>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="bg-white border-2 border-[#EEDDC8] rounded-3xl p-8 max-w-sm w-full shadow-2xl">
+                <h3 class="font-display text-2xl text-[#FF6B35] mb-6 uppercase tracking-wider">⚙️ Réglages</h3>
+                <div class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="font-mono text-[10px] text-[#8B7355] uppercase tracking-widest">Bonus Flip 7</label>
+                        <div class="flex items-center gap-3">
+                            <input type="number" id="setting-bonus" class="flex-1 bg-[#FFF9F0] border-2 border-[#EEDDC8] rounded-xl px-4 py-3 text-[#4A3B28] font-bold outline-none focus:border-[#FF6B35]" value="15">
+                            <span class="font-mono text-xs text-[#8B7355]">pts</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="closeSettings()" class="w-full mt-8 py-4 bg-[#FF6B35] text-white font-display text-lg rounded-xl shadow-lg hover:bg-[#FF8B5E] transition-all uppercase tracking-widest">
+                    Enregistrer
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Tab Navigation -->
+        <div class="lg:hidden flex border-b border-[#EEDDC8] bg-white sticky top-[72px] z-40">
+            <button onclick="setActiveTab('input')" id="tab-input" class="flex-1 py-3 flex items-center justify-center gap-2 font-mono text-[10px] tracking-widest transition-all text-[#FF6B35] border-b-2 border-[#FF6B35] bg-[#FF6B35]/5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                SAISIE
+            </button>
+            <button onclick="setActiveTab('stats')" id="tab-stats" class="flex-1 py-3 flex items-center justify-center gap-2 font-mono text-[10px] tracking-widest transition-all text-[#8B7355]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                SCORES
+            </button>
+        </div>
+
+        <main class="max-w-5xl mx-auto p-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Round Input -->
+                <section id="section-input" class="bg-white border-2 border-[#EEDDC8] rounded-3xl p-4 sm:p-8 shadow-sm">
+                    <h2 id="input-title" class="font-mono text-xs text-[#FF6B35] uppercase mb-8 pb-2 border-b border-[#EEDDC8] tracking-[4px]">
+                        // Résultats Manche 1
+                    </h2>
+
+                    <div id="player-inputs" class="grid grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-6">
+                        <!-- Inputs injected here -->
+                    </div>
+
+                    <button onclick="validateRound()" class="w-full mt-10 py-5 bg-[#FF6B35] text-white font-display text-xl rounded-2xl hover:bg-[#FF8B5E] transition-all uppercase tracking-widest shadow-lg">
+                        Valider la Manche
+                    </button>
+                </section>
+
+                <!-- Leaderboard & Chart -->
+                <div id="section-stats" class="space-y-6 hidden lg:block">
+                    <section class="bg-white border-2 border-[#EEDDC8] rounded-3xl p-6 shadow-sm">
+                        <h2 class="font-mono text-xs text-[#8B7355] uppercase mb-4 flex items-center gap-2">
+                            🏆 Classement
+                        </h2>
+                        <div id="scoreboard" class="space-y-4">
+                            <!-- Scores injected -->
+                        </div>
+                    </section>
+
+                    <section class="bg-white border-2 border-[#EEDDC8] rounded-3xl p-6 min-h-[250px] flex flex-col shadow-sm">
+                        <div class="font-mono text-xs text-[#8B7355] uppercase mb-4 flex items-center gap-2">
+                            📈 Évolution
+                        </div>
+                        <div class="flex-1 h-[250px]">
+                            <canvas id="evolutionChart"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- History -->
+                    <section id="history-section" class="bg-white border-2 border-[#EEDDC8] rounded-3xl overflow-hidden shadow-sm hidden">
+                        <div class="bg-[#FFF9F0] px-6 py-4 border-b border-[#EEDDC8] font-mono text-[#FF6B35] text-xs tracking-[4px] uppercase">
+                            📜 Historique des manches
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-center text-[10px] border-collapse">
+                                <thead>
+                                    <tr id="history-header-row" class="bg-[#FFF9F0]/50 border-b border-[#EEDDC8]">
+                                        <th class="p-2 font-mono text-[8px] tracking-widest text-[#8B7355]">#</th>
+                                        <!-- Player names injected -->
+                                    </tr>
+                                </thead>
+                                <tbody id="history-body" class="divide-y divide-[#EEDDC8]">
+                                    <!-- History rows injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let players = ['', ''];
+        let scores = {};
+        let round = 1;
+        let chart = null;
+        let activeTab = 'input';
+        let history = [];
+        let CONFIG = {
+            bonusFlip7: 15
+        };
+        const COLORS = ['#FF6B35', '#FFB347', '#8B7355', '#4A3B28', '#EEDDC8', '#D4A373'];
+
+        function renderPlayerList() {
+            const list = document.getElementById('player-list');
+            list.innerHTML = players.map((p, i) => `
+                <div class="flex items-center gap-3">
+                    <input
+                        class="flex-1 bg-[#FFF9F0] border-2 border-[#EEDDC8] rounded-xl px-4 py-3 text-[#4A3B28] font-bold outline-none focus:border-[#FF6B35] transition-all"
+                        value="${p}"
+                        placeholder="Joueur ${i + 1}"
+                        oninput="players[${i}] = this.value"
+                    />
+                    ${players.length > 2 ? `
+                        <button onclick="removePlayer(${i})" class="text-[#8B7355] hover:text-[#FF6B35] transition-colors p-2">
+                            ➖
+                        </button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function addPlayer() {
+            if (players.length < 6) {
+                players.push('');
+                renderPlayerList();
+            }
+        }
+
+        function removePlayer(i) {
+            players.splice(i, 1);
+            renderPlayerList();
+        }
+
+        function setActiveTab(tab) {
+            activeTab = tab;
+            const sectionInput = document.getElementById('section-input');
+            const sectionStats = document.getElementById('section-stats');
+            const tabInput = document.getElementById('tab-input');
+            const tabStats = document.getElementById('tab-stats');
+
+            if (tab === 'input') {
+                sectionInput.classList.remove('hidden');
+                sectionStats.classList.add('hidden', 'lg:block');
+                tabInput.classList.add('text-[#FF6B35]', 'border-[#FF6B35]', 'bg-[#FF6B35]/5');
+                tabInput.classList.remove('text-[#8B7355]');
+                tabStats.classList.remove('text-[#FF6B35]', 'border-[#FF6B35]', 'bg-[#FF6B35]/5');
+                tabStats.classList.add('text-[#8B7355]');
+            } else {
+                sectionInput.classList.add('hidden');
+                sectionStats.classList.remove('hidden');
+                tabStats.classList.add('text-[#FF6B35]', 'border-[#FF6B35]', 'bg-[#FF6B35]/5');
+                tabStats.classList.remove('text-[#8B7355]');
+                tabInput.classList.remove('text-[#FF6B35]', 'border-[#FF6B35]', 'bg-[#FF6B35]/5');
+                tabInput.classList.add('text-[#8B7355]');
+                if (chart) {
+                    setTimeout(() => chart.update(), 100);
+                }
+            }
+        }
+
+        function startGame() {
+            players = players.map((p, i) => p.trim() === '' ? `Joueur ${i + 1}` : p);
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            round = 1;
+            scores = {};
+            players.forEach(p => scores[p] = []);
+            renderInputs();
+            updateScoreboard();
+            initChart();
+        }
+
+        function quitGame() {
+            if (confirm('Quitter la partie ?')) {
+                document.getElementById('setup-screen').classList.remove('hidden');
+                document.getElementById('game-screen').classList.add('hidden');
+            }
+        }
+
+        function openSettings() {
+            document.getElementById('setting-bonus').value = CONFIG.bonusFlip7;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            CONFIG.bonusFlip7 = parseInt(document.getElementById('setting-bonus').value) || 15;
+            document.getElementById('settings-modal').classList.add('hidden');
+            renderInputs();
+        }
+
+        function renderInputs() {
+            const container = document.getElementById('player-inputs');
+            document.getElementById('round-indicator').innerText = `Manche ${round}`;
+            document.getElementById('input-title').innerText = `// Résultats Manche ${round}`;
+            
+            container.innerHTML = players.map(p => `
+                <div class="bg-[#FFF9F0] border-2 border-[#EEDDC8] rounded-2xl p-3 sm:p-6 space-y-3 sm:space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-1 sm:mb-2 gap-1">
+                        <span class="font-bold text-xs sm:text-lg truncate text-[#4A3B28]">${p}</span>
+                        <div id="total-preview-${p}" class="font-mono text-[#FF6B35] font-bold text-[10px] sm:text-base">+0</div>
+                    </div>
+                    <div class="space-y-3 sm:space-y-4">
+                        <div class="space-y-1">
+                            <label class="font-mono text-[8px] sm:text-[10px] text-[#8B7355] uppercase">Points</label>
+                            <div class="flex items-center gap-1">
+                                <button onclick="adjustVal('${p}', -5)" class="flex-1 h-10 sm:h-12 bg-white border border-[#EEDDC8] rounded-xl flex items-center justify-center hover:bg-[#FFF9F0] font-mono font-black text-[10px] sm:text-sm text-[#8B7355] active:scale-95 transition-all">-5</button>
+                                <input type="number" id="base-${p}" class="w-12 sm:w-20 bg-transparent border-b-2 border-[#EEDDC8] text-center text-xl sm:text-3xl font-black outline-none focus:border-[#FF6B35] text-[#4A3B28]" value="0" onchange="updatePreview('${p}')">
+                                <button onclick="adjustVal('${p}', 5)" class="flex-1 h-10 sm:h-12 bg-white border border-[#EEDDC8] rounded-xl flex items-center justify-center hover:bg-[#FFF9F0] font-mono font-black text-[10px] sm:text-sm text-[#8B7355] active:scale-95 transition-all">+5</button>
+                            </div>
+                        </div>
+                        <button id="bonus-${p}" onclick="toggleBonus('${p}')" class="w-full py-3 sm:py-4 rounded-xl border-2 font-mono text-[8px] sm:text-[10px] tracking-widest transition-all bg-white border-[#EEDDC8] text-[#8B7355] hover:border-[#FF6B35]">
+                            FLIP 7 (+${CONFIG.bonusFlip7})
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function adjustVal(player, val) {
+            const input = document.getElementById(`base-${player}`);
+            input.value = Math.max(0, parseInt(input.value) + val);
+            updatePreview(player);
+        }
+
+        function toggleBonus(player) {
+            const btn = document.getElementById(`bonus-${player}`);
+            const isActive = btn.classList.contains('bg-[#FF6B35]');
+            if (isActive) {
+                btn.classList.remove('bg-[#FF6B35]', 'border-[#FF6B35]', 'text-white', 'shadow-md');
+                btn.classList.add('bg-white', 'border-[#EEDDC8]', 'text-[#8B7355]');
+            } else {
+                btn.classList.add('bg-[#FF6B35]', 'border-[#FF6B35]', 'text-white', 'shadow-md');
+                btn.classList.remove('bg-white', 'border-[#EEDDC8]', 'text-[#8B7355]');
+            }
+            updatePreview(player);
+        }
+
+        function updatePreview(player) {
+            const base = parseInt(document.getElementById(`base-${player}`).value) || 0;
+            const bonus = document.getElementById(`bonus-${player}`).classList.contains('bg-[#FF6B35]') ? CONFIG.bonusFlip7 : 0;
+            document.getElementById(`total-preview-${player}`).innerText = `+${base + bonus}`;
+        }
+
+        function validateRound() {
+            const roundData = {};
+            players.forEach(p => {
+                const base = parseInt(document.getElementById(`base-${p}`).value) || 0;
+                const hasBonus = document.getElementById(`bonus-${p}`).classList.contains('bg-[#FF6B35]');
+                const total = base + (hasBonus ? CONFIG.bonusFlip7 : 0);
+                scores[p].push(total);
+                roundData[p] = { base, hasBonus, total };
+            });
+            history.push(roundData);
+            round++;
+            renderInputs();
+            updateScoreboard();
+            updateChart();
+            updateHistory();
+            
+            if (activeTab === 'input' && window.innerWidth < 1024) {
+                setActiveTab('stats');
+            }
+        }
+
+        function updateScoreboard() {
+            const scoreboard = document.getElementById('scoreboard');
+            const totals = players.map(p => ({ name: p, total: scores[p].reduce((a, b) => a + b, 0) }));
+            totals.sort((a, b) => b.total - a.total);
+            const maxTotal = Math.max(...totals.map(t => t.total));
+
+            scoreboard.innerHTML = totals.map((t, i) => `
+                <div class="flex items-center justify-between p-3 rounded-2xl transition-all ${i === 0 && t.total > 0 ? 'bg-[#FF6B35]/10 border-2 border-[#FF6B35] shadow-lg scale-[1.02]' : 'border-2 border-transparent'}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm ${i === 0 ? 'bg-[#FF6B35]' : 'bg-[#8B7355]'}">
+                            ${i + 1}
+                        </div>
+                        <span class="font-bold text-sm text-[#4A3B28]">${t.name}</span>
+                        ${i === 0 && t.total > 0 ? '🏆' : ''}
+                    </div>
+                    <span class="font-mono text-2xl font-bold ${i === 0 ? 'text-[#FF6B35]' : 'text-[#8B7355]'}">${t.total}</span>
+                </div>
+            `).join('');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('evolutionChart').getContext('2d');
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Début'],
+                    datasets: players.map((p, i) => ({
+                        label: p,
+                        data: [0],
+                        borderColor: COLORS[i % COLORS.length],
+                        backgroundColor: COLORS[i % COLORS.length],
+                        borderWidth: 4,
+                        tension: 0.1
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const p = context.dataset.label;
+                                    const rIdx = context.dataIndex;
+                                    if (rIdx === 0) return `${p}: 0`;
+                                    const d = history[rIdx - 1][p];
+                                    return `${p}: ${context.parsed.y} (+${d.total}${d.hasBonus ? ' incl. Flip7' : ''})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (!chart) return;
+            const datasets = players.map((p, i) => {
+                let current = 0;
+                const data = [0];
+                scores[p].forEach(s => {
+                    current += s;
+                    data.push(current);
+                });
+                return {
+                    label: p,
+                    data: data,
+                    borderColor: COLORS[i % COLORS.length],
+                    backgroundColor: 'transparent',
+                    tension: 0.3,
+                    fill: false
+                };
+            });
+            chart.data.labels = ['Début', ...Array.from({length: round - 1}, (_, i) => `M${i + 1}`)];
+            chart.data.datasets = datasets;
+            chart.update();
+        }
+
+        function updateHistory() {
+            const historySection = document.getElementById('history-section');
+            const historyBody = document.getElementById('history-body');
+            const headerRow = document.getElementById('history-header-row');
+            
+            if (history.length === 0) {
+                historySection.classList.add('hidden');
+                return;
+            }
+            
+            historySection.classList.remove('hidden');
+            
+            // Update headers
+            headerRow.innerHTML = `
+                <th class="p-2 font-mono text-[8px] tracking-widest text-[#8B7355]">#</th>
+            ` + players.map(p => `
+                <th class="p-2 font-mono text-[8px] tracking-widest text-[#8B7355] border-l border-[#EEDDC8] truncate">
+                    ${p.toUpperCase()}
+                </th>
+            `).join('');
+
+            // Update body
+            historyBody.innerHTML = history.map((rData, i) => `
+                <tr class="border-b border-[#EEDDC8]">
+                    <td class="p-2 font-mono text-[#FF6B35] text-[10px] bg-[#FFF9F0]/30">${i + 1}</td>
+                    ${players.map(p => {
+                        const d = rData[p];
+                        return `
+                            <td class="p-2 border-l border-[#EEDDC8]">
+                                <div class="flex flex-col gap-1">
+                                    <div class="text-[9px] text-[#8B7355] opacity-60">Base: ${d.base}</div>
+                                    ${d.hasBonus ? `<div class="bg-[#FF6B35]/10 text-[#FF6B35] text-[7px] px-1 rounded self-center">FLIP 7 (+${CONFIG.bonusFlip7})</div>` : ''}
+                                    <div class="font-mono text-[11px] text-[#4A3B28] font-bold">
+                                        ${d.total}
+                                    </div>
+                                </div>
+                            </td>
+                        `;
+                    }).join('')}
+                </tr>
+            `).join('');
+        }
+
+        renderPlayerList();
+    </script>
+</body>
+</html>

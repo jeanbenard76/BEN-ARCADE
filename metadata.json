@@ -1,0 +1,5 @@
+{
+  "name": "BEN'ARCADE - Score Tracker",
+  "description": "Application mobile-first pour le comptage de points de jeux de société (Tarot, Skull King, Flip7, Skyjo) avec visualisation de données et design immersif.",
+  "requestFramePermissions": []
+}

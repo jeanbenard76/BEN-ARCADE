@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skull King — BEN'ARCADE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Jim+Nightshade&family=Black+Ops+One&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Pirata+One&family=Cinzel:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Outfit", "ui-sans-serif", "system-ui", "sans-serif"],
+                        mono: ["Share Tech Mono", "ui-monospace", "SFMono-Regular", "monospace"],
+                        display: ["Black Ops One", "cursive"],
+                        pirate: ["Pirata One", "cursive"],
+                        cinzel: ["Cinzel", "serif"],
+                        riuka: ["Outfit", "sans-serif"],
+                        lacheyard: ["Jim Nightshade", "cursive"],
+                    },
+                    colors: {
+                        'pirate-gold': '#FFD700',
+                        'pirate-red': '#8B0000',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sea-bg {
+            background-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
+            animation: sea-drift 20s linear infinite;
+        }
+        @keyframes sea-drift {
+            from { background-position: 0 0; }
+            to { background-position: 100% 100%; }
+        }
+        .ship-sway {
+            animation: sway 6s ease-in-out infinite;
+        }
+        @keyframes sway {
+            0%, 100% { transform: rotate(0deg) translateY(0); }
+            25% { transform: rotate(0.5deg) translateY(3px); }
+            75% { transform: rotate(-0.5deg) translateY(-3px); }
+        }
+    </style>
+</head>
+<body class="bg-[#0a1428] text-[#f4f1e8] font-riuka relative overflow-x-hidden min-h-screen">
+    <audio id="pirate-music" src="https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a01251.mp3" loop></audio>
+
+    <div id="setup-screen" class="relative z-10">
+        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-20 sea-bg"></div>
+        <header class="p-12 text-center relative z-10">
+            <div class="ship-sway">
+                <h1 class="font-lacheyard text-6xl md:text-9xl text-pirate-gold drop-shadow-[0_0_15px_rgba(255,215,0,0.4)] tracking-widest mb-2">
+                    Skull King
+                </h1>
+                <p class="font-riuka text-sm tracking-[8px] opacity-60 uppercase">Calculateur de Butin</p>
+            </div>
+            <button onclick="toggleMusic()" class="mt-8 p-3 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-pirate-gold">
+                <span id="music-icon">🔇</span>
+            </button>
+        </header>
+
+        <main class="max-w-xl mx-auto p-6 relative z-10">
+            <div class="bg-[#1a0f0a]/60 border border-pirate-gold/30 rounded-3xl p-8 backdrop-blur-xl shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                <h2 class="font-riuka text-xs tracking-[4px] text-pirate-gold uppercase mb-8 flex items-center gap-2 opacity-70">
+                    ⚓ Équipage
+                </h2>
+                <div id="player-list" class="space-y-4">
+                    <!-- Players injected here -->
+                </div>
+                <button onclick="addPlayer()" class="w-full mt-4 py-4 border-2 border-dashed border-white/5 text-white/30 font-riuka text-xs hover:border-pirate-gold/30 hover:text-pirate-gold transition-all rounded-2xl flex items-center justify-center gap-2">
+                    + Ajouter un Pirate
+                </button>
+                <button onclick="startGame()" class="w-full mt-12 py-6 bg-pirate-gold text-[#050a14] font-riuka text-lg font-bold rounded-2xl shadow-[0_10px_30px_rgba(255,215,0,0.2)] hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-[4px]">
+                    Lever l'ancre
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <div id="game-screen" class="hidden relative z-10">
+        <header class="bg-[#0a1428]/90 border-b border-white/10 p-4 flex items-center justify-between sticky top-0 backdrop-blur-xl z-50">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="p-2 hover:bg-white/5 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-pirate-gold"><path d="m15 18-6-6 6-6"/></svg>
+                </a>
+                <div>
+                    <h1 class="font-lacheyard text-2xl text-pirate-gold tracking-widest">Skull King</h1>
+                    <p id="round-indicator" class="font-riuka text-[9px] tracking-[3px] opacity-40 uppercase">Manche 1</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="openSettings()" class="p-2 hover:bg-white/5 rounded-full transition-colors text-pirate-gold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <button onclick="toggleMusic()" class="p-2 hover:bg-white/5 rounded-full transition-colors text-pirate-gold">
+                    <span id="music-icon-game">🔇</span>
+                </button>
+                <button onclick="quitGame()" class="px-4 py-2 bg-white/5 border border-white/10 text-white/60 font-riuka text-[10px] tracking-widest rounded-xl hover:bg-white/10 transition-all uppercase">
+                    Quitter
+                </button>
+            </div>
+        </header>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="bg-[#1a0f0a] border border-pirate-gold/30 rounded-3xl p-8 max-w-md w-full shadow-2xl">
+                <h3 class="font-lacheyard text-4xl text-pirate-gold mb-6 uppercase tracking-wider">⚙️ Butins</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="font-riuka text-[9px] text-white/40 uppercase tracking-widest">Cartes 14</label>
+                        <input type="number" id="set-c14" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-pirate-gold font-bold outline-none focus:border-pirate-gold/50" value="10">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-riuka text-[9px] text-white/40 uppercase tracking-widest">Sirène/Pirate</label>
+                        <input type="number" id="set-sp" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-pirate-gold font-bold outline-none focus:border-pirate-gold/50" value="20">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-riuka text-[9px] text-white/40 uppercase tracking-widest">Pirate/SK</label>
+                        <input type="number" id="set-psk" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-pirate-gold font-bold outline-none focus:border-pirate-gold/50" value="30">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-riuka text-[9px] text-white/40 uppercase tracking-widest">SK/Sirène</label>
+                        <input type="number" id="set-sks" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-pirate-gold font-bold outline-none focus:border-pirate-gold/50" value="40">
+                    </div>
+                </div>
+                <button onclick="closeSettings()" class="w-full mt-8 py-4 bg-pirate-gold text-[#050a14] font-riuka text-lg font-bold rounded-2xl shadow-lg hover:scale-[1.02] transition-all uppercase tracking-widest">
+                    Enregistrer
+                </button>
+            </div>
+        </div>
+
+        <!-- Alert Modal -->
+        <div id="alert-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+            <div class="bg-[#1a0f0a] border border-pirate-red/40 rounded-3xl p-8 max-w-md w-full shadow-[0_0_50px_rgba(239,68,68,0.2)] text-center">
+                <div class="w-20 h-20 bg-pirate-red/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-pirate-red/20">
+                    <span class="text-4xl">☠️</span>
+                </div>
+                <h3 class="font-lacheyard text-3xl text-pirate-red mb-4 uppercase tracking-wider">Par mille sabords !</h3>
+                <p id="alert-message" class="font-riuka text-white/70 text-sm leading-relaxed mb-8"></p>
+                <button onclick="closeAlert()" class="w-full py-4 bg-pirate-red text-white font-riuka text-lg font-bold rounded-2xl shadow-lg hover:bg-pirate-red/80 transition-all uppercase tracking-widest">
+                    Compris
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Tab Navigation -->
+        <div class="lg:hidden flex border-b border-white/5 bg-[#050a14]/50 sticky top-[72px] z-40 backdrop-blur-md">
+            <button onclick="setActiveTab('input')" id="tab-input" class="flex-1 py-3 flex items-center justify-center gap-2 font-riuka text-[10px] tracking-widest transition-all text-pirate-gold border-b-2 border-pirate-gold bg-pirate-gold/5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                SAISIE
+            </button>
+            <button onclick="setActiveTab('stats')" id="tab-stats" class="flex-1 py-3 flex items-center justify-center gap-2 font-riuka text-[10px] tracking-widest transition-all text-white/40">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                SCORES
+            </button>
+        </div>
+
+        <main class="max-w-7xl mx-auto p-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 ship-sway">
+                <div id="section-input" class="lg:col-span-2 space-y-6">
+                    <div id="phase-indicator" class="p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400">
+                        PHASE DE PARIS
+                    </div>
+
+                    <div class="bg-white/5 border border-white/10 rounded-3xl p-4 sm:p-8 shadow-2xl backdrop-blur-xl">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                            <div class="flex items-center gap-4">
+                                <h2 id="round-title" class="font-lacheyard text-4xl text-pirate-gold">Manche 1</h2>
+                                <div id="bid-status" class="hidden px-3 py-1 rounded font-mono text-xs font-bold border bg-orange-900/50 border-orange-500 text-orange-200"></div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="bonus-toggle" onclick="toggleBonusView()" class="hidden flex items-center gap-2 px-3 py-2 rounded-lg border font-riuka text-[10px] font-bold transition-all bg-white/5 text-pirate-gold border-white/10">
+                                    Voir Bonus
+                                </button>
+                                <label class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
+                                    <span class="text-xl">🐙</span>
+                                    <span class="font-riuka text-xs text-pirate-gold font-bold">Kraken</span>
+                                    <input type="checkbox" id="kraken-played" class="w-5 h-5 accent-pirate-gold" onchange="updateBidStatus()">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="player-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                            <!-- Input cards injected here -->
+                        </div>
+
+                        <div class="mt-8">
+                            <button id="main-action-btn" onclick="nextPhase()" class="w-full py-5 bg-pirate-gold text-[#050a14] font-riuka text-sm font-bold rounded-2xl shadow-xl hover:scale-[1.01] active:scale-95 transition-all uppercase tracking-[4px]">
+                                ⚓ Terminer les paris
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-stats" class="space-y-6 hidden lg:block">
+                    <section class="bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl">
+                        <div class="bg-white/5 px-6 py-4 border-b border-white/10 font-riuka text-pirate-gold text-xs tracking-[4px] flex items-center gap-2">
+                            ⚔️ CLASSEMENT
+                        </div>
+                        <div id="scoreboard" class="divide-y divide-white/5">
+                            <!-- Scores injected -->
+                        </div>
+                    </section>
+
+                    <section class="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-2xl min-h-[250px] backdrop-blur-xl">
+                        <div class="font-riuka text-[9px] text-white/30 uppercase mb-6 tracking-[4px]">Trésors accumulés</div>
+                        <div class="h-[250px]">
+                            <canvas id="evolutionChart"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- History -->
+                    <section id="history-section" class="bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl hidden">
+                        <div class="bg-white/5 px-6 py-4 border-b border-white/10 font-riuka text-pirate-gold text-xs tracking-[4px] flex items-center gap-2">
+                            📜 JOURNAL DE BORD
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-center text-[10px] border-collapse">
+                                <thead>
+                                    <tr id="history-header-row" class="bg-white/5 border-b border-white/10">
+                                        <th class="p-2 font-riuka text-[8px] tracking-widest text-white/40">#</th>
+                                        <!-- Player names injected -->
+                                    </tr>
+                                </thead>
+                                <tbody id="history-body" class="divide-y divide-white/5">
+                                    <!-- History rows injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let players = ['Pirate 1', 'Pirate 2', 'Pirate 3'];
+        let rounds = {};
+        let currentRound = 1;
+        let phase = 'betting'; // 'betting' or 'results'
+        let showBonuses = false;
+        let chart = null;
+        let isMusicPlaying = false;
+        let activeTab = 'input';
+        let CONFIG = {
+            bonusC14: 10,
+            bonusSP: 20,
+            bonusPSK: 30,
+            bonusSKS: 40
+        };
+        const COLORS = ['#FFD700', '#D0004A', '#006E7A', '#1A7A00', '#5A00B8', '#B84A00'];
+
+        let currentRoundState = { bids: {}, won: {}, bonuses: {} };
+
+        function renderPlayerList() {
+            const list = document.getElementById('player-list');
+            list.innerHTML = players.map((p, i) => `
+                <div class="flex items-center gap-4">
+                    <input
+                        type="text"
+                        class="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-[#f4f1e8] font-riuka font-medium outline-none focus:border-pirate-gold/50 focus:bg-white/10 transition-all"
+                        placeholder="Pirate ${i + 1}"
+                        /* On garde la valeur vide au début, ou on affiche le nom s'il a été saisi */
+                        value="${p.startsWith('Pirate ') ? '' : p}" 
+                        onchange="players[${i}] = this.value || 'Pirate ${i + 1}'"
+                    />
+                    ${players.length > 2 ? `
+                        <button onclick="removePlayer(${i})" class="p-3 text-white/20 hover:text-pirate-red transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function addPlayer() {
+            if (players.length < 8) {
+                // On ajoute la chaîne générique pour maintenir l'index
+                players.push(`Pirate ${players.length + 1}`);
+                renderPlayerList();
+            }
+        }
+
+        function removePlayer(i) {
+            players.splice(i, 1);
+            renderPlayerList();
+        }
+
+        function openSettings() {
+            document.getElementById('set-c14').value = CONFIG.bonusC14;
+            document.getElementById('set-sp').value = CONFIG.bonusSP;
+            document.getElementById('set-psk').value = CONFIG.bonusPSK;
+            document.getElementById('set-sks').value = CONFIG.bonusSKS;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            CONFIG.bonusC14 = parseInt(document.getElementById('set-c14').value) || 10;
+            CONFIG.bonusSP = parseInt(document.getElementById('set-sp').value) || 20;
+            CONFIG.bonusPSK = parseInt(document.getElementById('set-psk').value) || 30;
+            CONFIG.bonusSKS = parseInt(document.getElementById('set-sks').value) || 40;
+            document.getElementById('settings-modal').classList.add('hidden');
+            renderInputs();
+        }
+
+        function showAlert(message) {
+            document.getElementById('alert-message').innerText = message;
+            document.getElementById('alert-modal').classList.remove('hidden');
+        }
+
+        function closeAlert() {
+            document.getElementById('alert-modal').classList.add('hidden');
+        }
+
+        function setActiveTab(tab) {
+            activeTab = tab;
+            const sectionInput = document.getElementById('section-input');
+            const sectionStats = document.getElementById('section-stats');
+            const tabInput = document.getElementById('tab-input');
+            const tabStats = document.getElementById('tab-stats');
+
+            if (tab === 'input') {
+                sectionInput.classList.remove('hidden');
+                sectionStats.classList.add('hidden', 'lg:block');
+                tabInput.classList.add('text-pirate-gold', 'border-pirate-gold', 'bg-pirate-gold/5');
+                tabInput.classList.remove('text-white/40');
+                tabStats.classList.remove('text-pirate-gold', 'border-pirate-gold', 'bg-pirate-gold/5');
+                tabStats.classList.add('text-white/40');
+            } else {
+                sectionInput.classList.add('hidden');
+                sectionStats.classList.remove('hidden');
+                tabStats.classList.add('text-pirate-gold', 'border-pirate-gold', 'bg-pirate-gold/5');
+                tabStats.classList.remove('text-white/40');
+                tabInput.classList.remove('text-pirate-gold', 'border-pirate-gold', 'bg-pirate-gold/5');
+                tabInput.classList.add('text-white/40');
+                if (chart) {
+                    setTimeout(() => chart.update(), 100);
+                }
+            }
+        }
+
+        function toggleMusic() {
+            const audio = document.getElementById('pirate-music');
+            isMusicPlaying = !isMusicPlaying;
+            if (isMusicPlaying) {
+                audio.play();
+                document.getElementById('music-icon').innerText = '🔊';
+                document.getElementById('music-icon-game').innerText = '🔊';
+            } else {
+                audio.pause();
+                document.getElementById('music-icon').innerText = '🔇';
+                document.getElementById('music-icon-game').innerText = '🔇';
+            }
+        }
+
+        function startGame() {
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            currentRound = 1;
+            rounds = {};
+            phase = 'betting';
+            
+            // Initialize round state
+            currentRoundState = { bids: {}, won: {}, bonuses: {} };
+            players.forEach(p => {
+                currentRoundState.bids[p] = 0;
+                currentRoundState.won[p] = 0;
+                currentRoundState.bonuses[p] = { cards14: 0, mermaidPirate: 0, pirateSK: 0, skMermaid: 0 };
+            });
+
+            renderInputs();
+            updateScoreboard();
+            initChart();
+            
+            if (activeTab === 'input' && window.innerWidth < 1024) {
+                setActiveTab('input');
+            }
+        }
+
+        function quitGame() {
+            if (confirm('Quitter la partie ?')) {
+                document.getElementById('setup-screen').classList.remove('hidden');
+                document.getElementById('game-screen').classList.add('hidden');
+            }
+        }
+
+        function renderInputs() {
+            const container = document.getElementById('player-inputs');
+            document.getElementById('round-indicator').innerText = `Manche ${currentRound}`;
+            document.getElementById('round-title').innerText = `Manche ${currentRound}`;
+            
+            container.innerHTML = players.map((p, i) => {
+                const isStarter = i === (currentRound - 1) % players.length;
+                const bid = currentRoundState.bids[p] || 0;
+                const won = currentRoundState.won[p] || 0;
+
+                return `
+                    <div class="bg-white/5 border ${isStarter ? 'border-pirate-gold/40 shadow-[0_0_20px_rgba(255,215,0,0.1)]' : 'border-white/5'} rounded-2xl p-4 sm:p-6 transition-all backdrop-blur-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-white/5 pb-2 gap-2">
+                            <div class="flex items-center justify-between w-full min-w-0 gap-3">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <h3 class="font-riuka text-lg text-white font-semibold truncate">${p}</h3>
+                                    ${isStarter ? '<span class="bg-pirate-gold text-[#050a14] text-[8px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest shrink-0">Premier</span>' : ''}
+                                </div>
+                                <div id="score-preview-${p}" class="font-mono text-xs font-bold text-pirate-gold bg-white/5 px-2 py-1 rounded-lg border border-pirate-gold/20">
+                                    +0
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-riuka text-white/30 uppercase tracking-widest">Pari</label>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="adjustVal('${p}', 'bid', -1)" ${phase === 'results' ? 'disabled' : ''} class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 active:scale-90 transition-all disabled:opacity-20">➖</button>
+                                    <input type="number" id="bid-${p}" ${phase === 'results' ? 'disabled' : ''} class="w-full h-10 bg-white/10 border border-white/10 rounded-xl px-1 text-white font-bold text-center text-sm outline-none focus:border-pirate-gold/30 disabled:opacity-50" value="${bid}" onchange="currentRoundState.bids['${p}'] = parseInt(this.value) || 0; updateBidStatus(); updateScorePreviews();">
+                                    <button onclick="adjustVal('${p}', 'bid', 1)" ${phase === 'results' ? 'disabled' : ''} class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 active:scale-90 transition-all disabled:opacity-20">➕</button>
+                                </div>
+                            </div>
+                            <div class="${phase === 'betting' ? 'hidden' : ''} space-y-2">
+                                <label class="text-[9px] font-riuka text-white/30 uppercase tracking-widest">Fait</label>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="adjustVal('${p}', 'won', -1)" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 active:scale-90 transition-all">➖</button>
+                                    <input type="number" id="won-${p}" class="w-full h-10 bg-white/10 border border-white/10 rounded-xl px-1 text-white font-bold text-center text-sm outline-none focus:border-pirate-gold/30" value="${won}" onchange="currentRoundState.won['${p}'] = parseInt(this.value) || 0; updateScorePreviews();">
+                                    <button onclick="adjustVal('${p}', 'won', 1)" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 active:scale-90 transition-all">➕</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="bonus-area-${p}" class="${phase === 'results' && showBonuses ? '' : 'hidden'} mt-3 pt-2 border-t border-pirate-gold/10 space-y-2">
+                            <div class="grid grid-cols-1 gap-y-2">
+                                ${renderBonusRow(p, 'cards14', `Cartes 14 (+${CONFIG.bonusC14})`)}
+                                ${renderBonusRow(p, 'mermaidPirate', `Sirène/Pirate (+${CONFIG.bonusSP})`)}
+                                ${renderBonusRow(p, 'pirateSK', `Pirate/SK (+${CONFIG.bonusPSK})`)}
+                                ${renderBonusRow(p, 'skMermaid', `SK/Sirène (+${CONFIG.bonusSKS})`)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            updateBidStatus();
+            updateScorePreviews();
+        }
+
+        function renderBonusRow(player, key, label) {
+            const val = currentRoundState.bonuses[player] ? currentRoundState.bonuses[player][key] : 0;
+            return `
+                <div class="flex items-center justify-between gap-2">
+                    <label class="text-[8px] font-riuka text-white/30 uppercase tracking-widest leading-none truncate">${label}</label>
+                    <div class="flex items-center gap-2">
+                        <button onclick="adjustBonus('${player}', '${key}', -1)" class="p-1 bg-white/5 rounded-lg hover:bg-white/10">➖</button>
+                        <span id="bonus-${player}-${key}" class="font-mono text-xs text-pirate-gold font-bold min-w-[15px] text-center">${val}</span>
+                        <button onclick="adjustBonus('${player}', '${key}', 1)" class="p-1 bg-white/5 rounded-lg hover:bg-white/10">➕</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function adjustVal(player, type, val) {
+            const input = document.getElementById(`${type}-${player}`);
+            const newVal = Math.max(0, parseInt(input.value) + val);
+            input.value = newVal;
+            
+            if (type === 'bid') currentRoundState.bids[player] = newVal;
+            else currentRoundState.won[player] = newVal;
+            
+            updateBidStatus();
+            updateScorePreviews();
+        }
+
+        function adjustBonus(player, key, val) {
+            const span = document.getElementById(`bonus-${player}-${key}`);
+            const newVal = Math.max(0, parseInt(span.innerText) + val);
+            span.innerText = newVal;
+            
+            if (!currentRoundState.bonuses[player]) currentRoundState.bonuses[player] = {};
+            currentRoundState.bonuses[player][key] = newVal;
+            
+            updateScorePreviews();
+        }
+
+        function updateScorePreviews() {
+            players.forEach(p => {
+                const bid = currentRoundState.bids[p] || 0;
+                const won = phase === 'betting' ? bid : (currentRoundState.won[p] || 0);
+                
+                let bonus = 0;
+                if (phase === 'results') {
+                    const bonusDetails = currentRoundState.bonuses[p] || { cards14: 0, mermaidPirate: 0, pirateSK: 0, skMermaid: 0 };
+                    bonus = (bonusDetails.cards14 || 0) * CONFIG.bonusC14 +
+                            (bonusDetails.mermaidPirate || 0) * CONFIG.bonusSP +
+                            (bonusDetails.pirateSK || 0) * CONFIG.bonusPSK +
+                            (bonusDetails.skMermaid || 0) * CONFIG.bonusSKS;
+                }
+
+                let score = 0;
+                if (bid === won) {
+                    score = bid === 0 ? currentRound * 10 : bid * 20;
+                } else {
+                    score = bid === 0 ? -currentRound * 10 : -Math.abs(bid - won) * 10;
+                }
+                score += bonus;
+
+                const preview = document.getElementById(`score-preview-${p}`);
+                if (preview) {
+                    preview.innerText = (score >= 0 ? '+' : '') + score;
+                    preview.className = `font-mono text-xs font-bold px-2 py-1 rounded-lg border transition-all ${
+                        score > 0 ? 'text-green-400 border-green-500/30 bg-green-500/5' : 
+                        score < 0 ? 'text-pirate-red border-pirate-red/30 bg-pirate-red/5' : 
+                        'text-pirate-gold border-pirate-gold/30 bg-pirate-gold/5'
+                    }`;
+                }
+            });
+        }
+
+        function updateBidStatus() {
+            const totalBids = players.reduce((acc, p) => acc + (currentRoundState.bids[p] || 0), 0);
+            const diff = totalBids - currentRound;
+            const badge = document.getElementById('bid-status');
+            if (diff === 0) {
+                badge.classList.add('hidden');
+            } else {
+                badge.classList.remove('hidden');
+                badge.innerText = `${diff > 0 ? 'OVERBID' : 'UNDERBID'} de ${Math.abs(diff)}`;
+                badge.className = `px-3 py-1 rounded font-mono text-xs font-bold border ${diff > 0 ? 'bg-orange-900/50 border-orange-500 text-orange-200' : 'bg-yellow-900/50 border-yellow-500 text-yellow-200'}`;
+            }
+        }
+
+        function nextPhase() {
+            if (phase === 'betting') {
+                phase = 'results';
+                document.getElementById('phase-indicator').innerText = 'PHASE DE RÉSULTATS';
+                document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-pirate-red/10 border-pirate-red/30 text-pirate-red';
+                document.getElementById('bonus-toggle').classList.remove('hidden');
+                document.getElementById('main-action-btn').innerText = '⚔️ Valider la manche';
+                document.getElementById('main-action-btn').onclick = validateRound;
+                renderInputs();
+            }
+        }
+
+        function validateRound() {
+            const totalWon = players.reduce((acc, p) => acc + (currentRoundState.won[p] || 0), 0);
+            const kraken = document.getElementById('kraken-played').checked;
+            const expected = kraken ? currentRound - 1 : currentRound;
+            
+            if (totalWon !== expected) {
+                let msg = `Le nombre total de plis faits (${totalWon}) ne correspond pas au butin attendu (${expected}).\n\n`;
+                if (kraken) {
+                    msg += "Le Kraken a été joué, il devrait donc y avoir une levée de moins que le numéro de la manche.";
+                } else {
+                    msg += "Chaque carte jouée doit remporter un pli. Vérifiez les comptes de chaque pirate !";
+                }
+                showAlert(msg);
+                return;
+            }
+
+            const roundResults = {
+                scores: {},
+                details: {}
+            };
+            players.forEach(p => {
+                const bid = currentRoundState.bids[p] || 0;
+                const won = currentRoundState.won[p] || 0;
+                const bonusDetails = currentRoundState.bonuses[p] || { cards14: 0, mermaidPirate: 0, pirateSK: 0, skMermaid: 0 };
+                const bonus = (bonusDetails.cards14 || 0) * CONFIG.bonusC14 +
+                              (bonusDetails.mermaidPirate || 0) * CONFIG.bonusSP +
+                              (bonusDetails.pirateSK || 0) * CONFIG.bonusPSK +
+                              (bonusDetails.skMermaid || 0) * CONFIG.bonusSKS;
+                
+                let score = 0;
+                if (bid === won) {
+                    score = bid === 0 ? currentRound * 10 : bid * 20;
+                } else {
+                    score = bid === 0 ? -currentRound * 10 : -Math.abs(bid - won) * 10;
+                }
+                score += bonus;
+                roundResults.scores[p] = score;
+                roundResults.details[p] = { bid, won, bonus, bonusDetails };
+            });
+
+            rounds[currentRound] = roundResults;
+            if (currentRound < 10) {
+                currentRound++;
+                phase = 'betting';
+                
+                // Reset round state
+                currentRoundState = { bids: {}, won: {}, bonuses: {} };
+                players.forEach(p => {
+                    currentRoundState.bids[p] = 0;
+                    currentRoundState.won[p] = 0;
+                    currentRoundState.bonuses[p] = { cards14: 0, mermaidPirate: 0, pirateSK: 0, skMermaid: 0 };
+                });
+
+                document.getElementById('phase-indicator').innerText = 'PHASE DE PARIS';
+                document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400';
+                document.getElementById('bonus-toggle').classList.add('hidden');
+                document.getElementById('main-action-btn').innerText = '⚓ Terminer les paris';
+                document.getElementById('main-action-btn').onclick = nextPhase;
+                document.getElementById('kraken-played').checked = false;
+                renderInputs();
+                updateScoreboard();
+                updateChart();
+                updateHistory();
+                
+                if (activeTab === 'input' && window.innerWidth < 1024) {
+                    setActiveTab('stats');
+                }
+            } else {
+                alert('Partie terminée !');
+                updateScoreboard();
+                updateChart();
+                updateHistory();
+                if (activeTab === 'input' && window.innerWidth < 1024) {
+                    setActiveTab('stats');
+                }
+            }
+        }
+
+        function toggleBonusView() {
+            showBonuses = !showBonuses;
+            document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Bonus' : 'Voir Bonus';
+            players.forEach(p => {
+                const area = document.getElementById(`bonus-area-${p}`);
+                if (showBonuses) area.classList.remove('hidden');
+                else area.classList.add('hidden');
+            });
+        }
+
+        function updateScoreboard() {
+            const scoreboard = document.getElementById('scoreboard');
+            const totals = players.map(p => {
+                let total = 0;
+                Object.values(rounds).forEach(r => total += (r.scores ? r.scores[p] : r[p]) || 0);
+                return { name: p, total };
+            });
+            const maxTotal = Math.max(...totals.map(t => t.total));
+
+            scoreboard.innerHTML = totals.map((t, i) => `
+                <div class="flex items-center justify-between px-6 py-5 ${t.total === maxTotal && Object.keys(rounds).length > 0 ? 'bg-pirate-gold/5' : ''}">
+                    <div class="flex items-center gap-4">
+                        <span class="font-riuka text-white/20 w-4 text-xs">0${i + 1}</span>
+                        <span class="font-medium text-sm text-white/80">${t.name}</span>
+                    </div>
+                    <div class="font-mono text-2xl font-bold ${t.total >= 0 ? 'text-green-400' : 'text-pirate-red'}">
+                        ${t.total}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('evolutionChart').getContext('2d');
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Début'],
+                    datasets: players.map((p, i) => ({
+                        label: p,
+                        data: [0],
+                        borderColor: COLORS[i % COLORS.length],
+                        backgroundColor: COLORS[i % COLORS.length],
+                        borderWidth: 4,
+                        tension: 0.1
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (!chart) return;
+            const datasets = players.map((p, i) => {
+                let current = 0;
+                const data = [0];
+                Object.values(rounds).forEach(r => {
+                    current += (r.scores ? r.scores[p] : r[p]) || 0;
+                    data.push(current);
+                });
+                return {
+                    label: p,
+                    data: data,
+                    borderColor: COLORS[i % COLORS.length],
+                    backgroundColor: COLORS[i % COLORS.length] + '20',
+                    tension: 0.3,
+                    fill: true
+                };
+            });
+            chart.data.labels = ['Début', ...Object.keys(rounds).map(r => `M${r}`)];
+            chart.data.datasets = datasets;
+            chart.update();
+        }
+
+        function updateHistory() {
+            const historySection = document.getElementById('history-section');
+            const historyBody = document.getElementById('history-body');
+            const headerRow = document.getElementById('history-header-row');
+            
+            if (Object.keys(rounds).length === 0) {
+                historySection.classList.add('hidden');
+                return;
+            }
+            
+            historySection.classList.remove('hidden');
+            
+            // Update headers
+            headerRow.innerHTML = `
+                <th class="p-2 font-riuka text-[8px] tracking-widest text-white/40">#</th>
+            ` + players.map(p => `
+                <th class="p-2 font-riuka text-[7px] tracking-widest text-white/60 border-l border-white/10 truncate">
+                    ${p.toUpperCase()}
+                </th>
+            `).join('');
+
+            // Update body
+            historyBody.innerHTML = Object.entries(rounds).map(([rIndex, rData]) => `
+                <tr class="border-b border-white/5">
+                    <td class="p-2 font-mono text-pirate-gold text-[10px] bg-white/5">${rIndex}</td>
+                    ${players.map(p => {
+                        const d = rData.details[p];
+                        const s = rData.scores[p];
+                        return `
+                            <td class="p-2 border-l border-white/5">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center justify-between gap-1">
+                                        <span class="text-[8px] opacity-40">Pari: ${d.bid}</span>
+                                        <span class="text-[8px] opacity-40">Fait: ${d.won}</span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1 justify-center">
+                                        ${d.bonusDetails.cards14 > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.cards14 * CONFIG.bonusC14} (C14)</span>` : ''}
+                                        ${d.bonusDetails.mermaidPirate > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.mermaidPirate * CONFIG.bonusSP} (S/P)</span>` : ''}
+                                        ${d.bonusDetails.pirateSK > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.pirateSK * CONFIG.bonusPSK} (P/SK)</span>` : ''}
+                                        ${d.bonusDetails.skMermaid > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.skMermaid * CONFIG.bonusSKS} (SK/S)</span>` : ''}
+                                    </div>
+                                    <div class="font-mono text-[11px] ${s >= 0 ? 'text-green-400' : 'text-pirate-red'} font-bold">
+                                        ${s > 0 ? '+' : ''}${s}
+                                    </div>
+                                </div>
+                            </td>
+                        `;
+                    }).join('')}
+                </tr>
+            `).join('');
+        }
+
+        renderPlayerList();
+    </script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEN'ARCADE — Score Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Jim+Nightshade&family=Black+Ops+One&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Pirata+One&family=Cinzel:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Outfit", "ui-sans-serif", "system-ui", "sans-serif"],
+                        mono: ["Share Tech Mono", "ui-monospace", "SFMono-Regular", "monospace"],
+                        display: ["Black Ops One", "cursive"],
+                        pirate: ["Pirata One", "cursive"],
+                        cinzel: ["Cinzel", "serif"],
+                    },
+                    colors: {
+                        accent: {
+                            yellow: '#C49000',
+                            pink: '#D0004A',
+                            cyan: '#006E7A',
+                            green: '#1A7A00',
+                            orange: '#B84A00',
+                            purple: '#5A00B8',
+                            red: '#D12027',
+                            gold: '#C5A059',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#F5F5F2] text-[#111111] antialiased min-h-screen">
+    <header class="hero relative overflow-hidden bg-white border-b border-[#E2E2DC] px-5 py-16 flex items-center justify-center min-h-[40vh]">
+        <div class="hero-grid-bg absolute inset-0 opacity-60 pointer-events-none"></div>
+        <div class="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center text-center">
+            <h1 class="font-display text-5xl md:text-8xl tracking-widest text-[#111] leading-none animate-flicker flex flex-wrap justify-center gap-x-4">
+                <span>BEN'</span><span class="text-accent-yellow">ARCADE</span>
+            </h1>
+            <p class="font-mono text-[11px] tracking-[5px] text-[#666] mt-4 uppercase">
+                Comptez vos points sans prise de tête !
+            </p>
+            <p class="text-base text-[#666] mt-4 max-w-md">Choisissez un jeu - Jouez - Debriefez entre amis.</p>
+            
+            <div class="inline-flex items-center gap-2 mt-8 px-6 py-2 border-2 border-accent-pink text-accent-pink font-mono text-[11px] tracking-[3px] rounded-sm opacity-100">
+                <span class="coin-icon">🪙</span>
+                INSERT COIN TO PLAY
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-5 pb-20">
+        <h2 class="text-center font-mono text-[10px] tracking-[5px] text-[#AAAAAA] my-8 uppercase">
+            — Choisissez votre jeu —
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- TAROT -->
+            <a href="tarot.html" class="group relative block bg-white border border-[#E2E2DC] rounded-md p-6 overflow-hidden transition-all hover:-translate-y-1 hover:shadow-xl active:translate-y-0 h-full flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-[3px] bg-accent-purple"></div>
+                <span class="text-4xl block mb-3">🃏</span>
+                <h3 class="font-display text-xl tracking-wider text-accent-purple mb-1">TAROT</h3>
+                <p class="text-sm text-[#666] leading-relaxed mb-4">
+                    Comptez vos points du Tarot à 5 avec toutes ses subtilités !
+                </p>
+                <div class="flex items-center gap-1.5 font-mono text-[10px] text-[#666] tracking-wider mt-auto">
+                    <div class="w-1.5 h-1.5 rounded-full bg-accent-purple"></div>
+                    5 joueurs
+                </div>
+                <div class="flex items-center gap-1.5 mt-4 font-mono text-[10px] tracking-widest text-accent-purple uppercase">
+                    JOUER <span class="transition-transform group-hover:translate-x-1">→</span>
+                </div>
+            </a>
+
+            <!-- FLIP 7 -->
+            <a href="flip7.html" class="group relative block bg-white border border-[#E2E2DC] rounded-md p-6 overflow-hidden transition-all hover:-translate-y-1 hover:shadow-xl active:translate-y-0 h-full flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-[3px] bg-accent-pink"></div>
+                <span class="text-4xl block mb-3">🎲</span>
+                <h3 class="font-display text-xl tracking-wider text-accent-pink mb-1">FLIP 7</h3>
+                <p class="text-sm text-[#666] leading-relaxed mb-4">
+                    Rapide et addictif, tentez votre chance sans vous bruler les ailes.
+                </p>
+                <div class="flex items-center gap-1.5 font-mono text-[10px] text-[#666] tracking-wider mt-auto">
+                    <div class="w-1.5 h-1.5 rounded-full bg-accent-pink"></div>
+                    2–8 joueurs
+                </div>
+                <div class="flex items-center gap-1.5 mt-4 font-mono text-[10px] tracking-widest text-accent-pink uppercase">
+                    JOUER <span class="transition-transform group-hover:translate-x-1">→</span>
+                </div>
+            </a>
+
+            <!-- SKULL KING -->
+            <a href="skullking.html" class="group relative block bg-white border border-[#E2E2DC] rounded-md p-6 overflow-hidden transition-all hover:-translate-y-1 hover:shadow-xl active:translate-y-0 h-full flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-[3px] bg-[#333333]"></div>
+                <span class="text-4xl block mb-3">⚓</span>
+                <h3 class="font-display text-xl tracking-wider text-[#333333] mb-1">SKULL KING</h3>
+                <p class="text-sm text-[#666] leading-relaxed mb-4">
+                    Plis, pirates & prédictions. Annoncez juste ou perdez beaucoup.
+                </p>
+                <div class="flex items-center gap-1.5 font-mono text-[10px] text-[#666] tracking-wider mt-auto">
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#333333]"></div>
+                    2–6 joueurs
+                </div>
+                <div class="flex items-center gap-1.5 mt-4 font-mono text-[10px] tracking-widest text-[#333333] uppercase">
+                    JOUER <span class="transition-transform group-hover:translate-x-1">→</span>
+                </div>
+            </a>
+
+            <!-- SKYJO -->
+            <a href="skyjo.html" class="group relative block bg-white border border-[#E2E2DC] rounded-md p-6 overflow-hidden transition-all hover:-translate-y-1 hover:shadow-xl active:translate-y-0 h-full flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-[3px] bg-accent-cyan"></div>
+                <span class="text-4xl block mb-3">🔢</span>
+                <h3 class="font-display text-xl tracking-wider text-accent-cyan mb-1">SKYJO</h3>
+                <p class="text-sm text-[#666] leading-relaxed mb-4">
+                    Marquez le moins de points possible en découvrant votre jeu.
+                </p>
+                <div class="flex items-center gap-1.5 font-mono text-[10px] text-[#666] tracking-wider mt-auto">
+                    <div class="w-1.5 h-1.5 rounded-full bg-accent-cyan"></div>
+                    2–8 joueurs
+                </div>
+                <div class="flex items-center gap-1.5 mt-4 font-mono text-[10px] tracking-widest text-accent-cyan uppercase">
+                    JOUER <span class="transition-transform group-hover:translate-x-1">→</span>
+                </div>
+            </a>
+
+            <!-- 6 QUI PREND -->
+            <a href="6quiprend!.html" class="group relative block bg-white border border-[#E2E2DC] rounded-md p-6 overflow-hidden transition-all hover:-translate-y-1 hover:shadow-xl active:translate-y-0 h-full flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-[3px] bg-accent-red"></div>
+                <span class="text-4xl block mb-3">🐂</span>
+                <h3 class="font-display text-xl tracking-wider text-accent-red mb-1">6 QUI PREND !</h3>
+                <p class="text-sm text-[#666] leading-relaxed mb-4">
+                    Évitez de ramasser les têtes de bœufs et piégez vos adversaires !
+                </p>
+                <div class="flex items-center gap-1.5 font-mono text-[10px] text-[#666] tracking-wider mt-auto">
+                    <div class="w-1.5 h-1.5 rounded-full bg-accent-red"></div>
+                    2–10 joueurs
+                </div>
+                <div class="flex items-center gap-1.5 mt-4 font-mono text-[10px] tracking-widest text-accent-red uppercase">
+                    JOUER <span class="transition-transform group-hover:translate-x-1">→</span>
+                </div>
+            </a>
+
+            <!-- AKROPOLIS -->
+            <a href="akropolis.html" class="group relative block bg-white border border-[#E2E2DC] rounded-md p-6 overflow-hidden transition-all hover:-translate-y-1 hover:shadow-xl active:translate-y-0 h-full flex flex-col">
+                <div class="absolute top-0 left-0 right-0 h-[3px] bg-accent-gold"></div>
+                <span class="text-4xl block mb-3">🏛️</span>
+                <h3 class="font-display text-xl tracking-wider text-accent-gold mb-1">AKROPOLIS</h3>
+                <p class="text-sm text-[#666] leading-relaxed mb-4">
+                    Devenez l'architecte le plus prestigieux de l'antiquité.
+                </p>
+                <div class="flex items-center gap-1.5 font-mono text-[10px] text-[#666] tracking-wider mt-auto">
+                    <div class="w-1.5 h-1.5 rounded-full bg-accent-gold"></div>
+                    2–4 joueurs
+                </div>
+                <div class="flex items-center gap-1.5 mt-4 font-mono text-[10px] tracking-widest text-accent-gold uppercase">
+                    JOUER <span class="transition-transform group-hover:translate-x-1">→</span>
+                </div>
+            </a>
+        </div>
+
+        <h2 class="text-center font-mono text-[10px] tracking-[5px] text-[#AAAAAA] mt-16 mb-8 uppercase">
+            — Prochainement —
+        </h2>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 opacity-50 grayscale">
+            
+            <!-- BELOTE -->
+            <div class="bg-white border border-[#E2E2DC] border-dashed rounded-md p-4 text-center">
+                <span class="text-2xl block mb-2">🎴</span>
+                <h3 class="font-display text-sm tracking-widest text-[#666]">BELOTE</h3>
+                <p class="font-mono text-[8px] text-[#AAAAAA] mt-1 uppercase tracking-tighter">Coming Soon</p>
+            </div>
+
+            <!-- COINCHE -->
+            <div class="bg-white border border-[#E2E2DC] border-dashed rounded-md p-4 text-center">
+                <span class="text-2xl block mb-2">♠️</span>
+                <h3 class="font-display text-sm tracking-widest text-[#666]">COINCHE</h3>
+                <p class="font-mono text-[8px] text-[#AAAAAA] mt-1 uppercase tracking-tighter">Coming Soon</p>
+            </div>
+
+            <!-- TAROT À 3 -->
+            <div class="bg-white border border-[#E2E2DC] border-dashed rounded-md p-4 text-center">
+                <span class="text-2xl block mb-2">🃏</span>
+                <h3 class="font-display text-sm tracking-widest text-[#666]">TAROT À 3</h3>
+                <p class="font-mono text-[8px] text-[#AAAAAA] mt-1 uppercase tracking-tighter">Coming Soon</p>
+            </div>
+
+            <!-- TAROT À 4 -->
+            <div class="bg-white border border-[#E2E2DC] border-dashed rounded-md p-4 text-center">
+                <span class="text-2xl block mb-2">🃏</span>
+                <h3 class="font-display text-sm tracking-widest text-[#666]">TAROT À 4</h3>
+                <p class="font-mono text-[8px] text-[#AAAAAA] mt-1 uppercase tracking-tighter">Coming Soon</p>
+            </div>
+
+            <!-- 7 WONDERS -->
+            <div class="bg-white border border-[#E2E2DC] border-dashed rounded-md p-4 text-center">
+                <span class="text-2xl block mb-2">🏛️</span>
+                <h3 class="font-display text-sm tracking-widest text-[#666]">7 WONDERS</h3>
+                <p class="font-mono text-[8px] text-[#AAAAAA] mt-1 uppercase tracking-tighter">Coming Soon</p>
+            </div>
+
+            <!-- CARCASSONNE -->
+            <div class="bg-white border border-[#E2E2DC] border-dashed rounded-md p-4 text-center">
+                <span class="text-2xl block mb-2">🏰</span>
+                <h3 class="font-display text-sm tracking-widest text-[#666]">CARCASSONNE</h3>
+                <p class="font-mono text-[8px] text-[#AAAAAA] mt-1 uppercase tracking-tighter">Coming Soon</p>
+            </div>
+
+            <!-- LES AVENTURIERS DU RAIL -->
+            <div class="bg-white border border-[#E2E2DC] border-dashed rounded-md p-4 text-center">
+                <span class="text-2xl block mb-2">🚂</span>
+                <h3 class="font-display text-sm tracking-widest text-[#666] leading-tight mt-1">AVENTURIERS<br>DU RAIL</h3>
+                <p class="font-mono text-[8px] text-[#AAAAAA] mt-1 uppercase tracking-tighter">Coming Soon</p>
+            </div>
+
+            <!-- AZUL -->
+            <div class="bg-white border border-[#E2E2DC] border-dashed rounded-md p-4 text-center">
+                <span class="text-2xl block mb-2">🟦</span>
+                <h3 class="font-display text-sm tracking-widest text-[#666]">AZUL</h3>
+                <p class="font-mono text-[8px] text-[#AAAAAA] mt-1 uppercase tracking-tighter">Coming Soon</p>
+            </div>
+
+            <!-- MÖLKKY -->
+            <div class="bg-white border border-[#E2E2DC] border-dashed rounded-md p-4 text-center">
+                <span class="text-2xl block mb-2">🪵</span>
+                <h3 class="font-display text-sm tracking-widest text-[#666]">MÖLKKY</h3>
+                <p class="font-mono text-[8px] text-[#AAAAAA] mt-1 uppercase tracking-tighter">Coming Soon</p>
+            </div>
+        </div>
+
+        <footer class="mt-24 pt-12 border-t border-[#E2E2DC] text-center">
+            <div class="font-display text-2xl tracking-widest text-[#111] mb-2">
+                BEN'<span class="text-accent-yellow">ARCADE</span>
+            </div>
+            <p class="font-mono text-[9px] tracking-[3px] text-[#AAAAAA] uppercase mb-6">
+                The Ultimate Game Companion
+            </p>
+            <div class="flex flex-col items-center gap-2">
+                <p class="text-xs text-[#666]">Une idée ? Un bug ? Contactez-nous :</p>
+                <a href="mailto:jean.benard365@gmail.com" class="font-mono text-sm text-accent-orange hover:underline tracking-wider">
+                    jean.benard365@gmail.com
+                </a>
+            </div>
+            <p class="mt-12 font-mono text-[8px] text-[#AAAAAA] uppercase tracking-[4px]">
+                © 2026 BEN'ARCADE — DESIGNED FOR VICTORY
+            </p>
+        </footer>
+    </main>
+</body>
+</html>

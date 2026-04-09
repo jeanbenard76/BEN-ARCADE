@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akropolis — BEN'ARCADE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Montserrat:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Montserrat", "ui-sans-serif", "system-ui", "sans-serif"],
+                        display: ["Cinzel", "serif"],
+                        mono: ["Share Tech Mono", "monospace"],
+                    },
+                    colors: {
+                        akro: {
+                            blue: '#1A365D',     
+                            gold: '#C5A059',     
+                            stone: '#F5F5F0',    
+                            dark: '#1C1C1C',     
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F5F5F0;
+            color: #1C1C1C;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .bg-stone-pattern {
+            background-image: 
+                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .premium-shadow {
+            box-shadow: 0 10px 40px -10px rgba(26, 54, 93, 0.1), 0 4px 10px -4px rgba(26, 54, 93, 0.05);
+        }
+        .stepper-btn {
+            touch-action: manipulation;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="antialiased pb-20 relative bg-stone-pattern">
+
+    <!-- ÉCRAN DE CONFIGURATION -->
+    <div id="setup-screen" class="relative min-h-screen bg-gradient-to-br from-akro-blue to-slate-900 overflow-hidden flex flex-col justify-center">
+        <div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(#C5A059 1px, transparent 1px), linear-gradient(90deg, #C5A059 1px, transparent 1px); background-size: 60px 60px;"></div>
+        
+        <header class="text-center relative z-10 px-4 mb-8">
+            <div class="inline-flex items-center justify-center mb-6">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#C5A059" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 20h20"/><path d="M4 20V10"/><path d="M8 20V10"/><path d="M12 20V10"/><path d="M16 20V10"/><path d="M20 20V10"/><path d="M2 10l10-6 10 6"/><path d="M12 4v6"/>
+                </svg>
+            </div>
+            <h1 class="font-display text-5xl md:text-7xl text-white tracking-[0.15em] font-semibold drop-shadow-lg">
+                AKROPOLIS
+            </h1>
+            <p class="font-sans text-xs md:text-sm tracking-[0.3em] text-akro-gold mt-4 uppercase font-medium">
+                Registre des Architectes
+            </p>
+        </header>
+
+        <main class="w-full max-w-lg mx-auto p-6 relative z-10">
+            <div class="p-1 border border-akro-gold/30 bg-white/5 backdrop-blur-sm shadow-2xl">
+                <div class="bg-white p-8 border border-akro-gold/20">
+                    <h2 class="font-display text-xl tracking-[0.2em] text-akro-blue uppercase mb-6 text-center border-b border-gray-100 pb-4 font-semibold">
+                        Cités en lice
+                    </h2>
+                    
+                    <div id="player-list" class="space-y-4 relative z-30 mb-6">
+                        <!-- Les joueurs injectés ici -->
+                    </div>
+                    
+                    <button type="button" onclick="addPlayer()" class="w-full py-3 border border-gray-200 text-gray-500 font-sans text-xs tracking-widest hover:border-akro-gold hover:text-akro-gold transition-colors uppercase font-semibold">
+                        + Nouvel Architecte
+                    </button>
+                    
+                    <button type="button" onclick="startGame()" class="w-full mt-8 py-5 bg-akro-blue text-akro-gold font-display text-lg shadow-lg hover:bg-slate-800 transition-colors uppercase tracking-[0.2em] font-bold">
+                        Ériger les Cités
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ÉCRAN DE JEU -->
+    <div id="game-screen" class="hidden min-h-screen">
+        
+        <!-- Header In-game -->
+        <header class="bg-akro-blue text-white px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-md border-b border-akro-gold/50">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="p-2 hover:bg-white/10 transition-colors rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C5A059" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </a>
+                <div>
+                    <h1 class="font-display text-xl tracking-[0.2em] text-akro-gold uppercase font-semibold">
+                        AKROPOLIS
+                    </h1>
+                    <p id="round-indicator" class="font-sans text-[10px] tracking-[0.2em] text-white/70 uppercase font-medium mt-1">PARTIE 1</p>
+                </div>
+            </div>
+            <button onclick="quitGame()" class="px-4 py-2 border border-akro-gold/40 text-akro-gold font-sans text-[10px] tracking-[0.2em] hover:bg-akro-gold/10 transition-colors uppercase font-semibold rounded">
+                Quitter
+            </button>
+        </header>
+
+        <!-- Navigation Mobile -->
+        <div class="lg:hidden flex border-b border-gray-200 bg-white sticky top-[68px] z-40 shadow-sm">
+            <button onclick="setActiveTab('input')" id="tab-input" class="flex-1 py-4 flex items-center justify-center gap-2 font-display text-xs tracking-widest transition-all text-akro-blue border-b-2 border-akro-blue bg-slate-50 font-bold">
+                REGISTRE
+            </button>
+            <button onclick="setActiveTab('stats')" id="tab-stats" class="flex-1 py-4 flex items-center justify-center gap-2 font-display text-xs tracking-widest transition-all text-gray-400 border-b-2 border-transparent font-bold">
+                PANTHÉON
+            </button>
+        </div>
+
+        <main class="max-w-7xl mx-auto p-4 sm:p-8 mt-2">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- ZONE DE CALCULS (Registre) -->
+                <section id="section-input" class="lg:col-span-7 pb-10">
+                    <div class="flex items-center justify-between mb-6 pb-2 border-b-2 border-gray-200">
+                        <h2 class="font-display text-xl tracking-[0.1em] text-akro-blue font-bold uppercase">
+                            Calcul des Cités
+                        </h2>
+                        <span class="text-xs text-gray-500 font-sans tracking-widest uppercase font-bold">Automatique 🧮</span>
+                    </div>
+
+                    <div id="player-inputs" class="grid grid-cols-1 gap-8">
+                        <!-- Calculatrices injectées -->
+                    </div>
+
+                    <div class="mt-12 pt-6">
+                        <button type="button" onclick="validateRound()" class="w-full py-5 bg-akro-blue text-akro-gold font-display text-lg hover:bg-slate-800 active:scale-95 transition-all uppercase tracking-[0.2em] font-bold shadow-xl rounded-xl border-b-4 border-slate-900">
+                            Valider les Cités
+                        </button>
+                    </div>
+                </section>
+
+                <!-- STATISTIQUES & HISTORIQUE -->
+                <div id="section-stats" class="lg:col-span-5 space-y-8 hidden lg:block">
+                    <section class="bg-white premium-shadow border border-gray-100 rounded-xl overflow-hidden">
+                        <div class="bg-akro-blue px-6 py-4 border-b border-akro-gold/20 flex justify-between items-center">
+                            <span class="font-display text-sm tracking-[0.15em] text-white uppercase font-bold">🏆 Le Panthéon</span>
+                            <span class="text-[10px] text-akro-gold font-sans uppercase tracking-widest">Classement</span>
+                        </div>
+                        <div id="scoreboard" class="divide-y divide-gray-100 p-2">
+                            <!-- Scores injectés -->
+                        </div>
+                    </section>
+
+                    <section class="bg-white premium-shadow border border-gray-100 p-6 rounded-xl">
+                        <div class="font-display text-sm tracking-[0.15em] text-akro-blue font-bold uppercase mb-6 text-center border-b border-gray-100 pb-3">
+                            Gloire des Cités
+                        </div>
+                        <div class="h-[220px] w-full">
+                            <canvas id="evolutionChart"></canvas>
+                        </div>
+                    </section>
+
+                    <section id="history-section" class="bg-white premium-shadow border border-gray-100 overflow-hidden hidden rounded-xl">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 font-display text-sm tracking-[0.15em] text-akro-blue font-bold uppercase text-center">
+                            Archives
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-center text-sm border-collapse font-sans">
+                                <thead>
+                                    <tr id="history-header-row" class="bg-white border-b-2 border-gray-100 text-xs text-gray-400 tracking-wider">
+                                        <th class="p-4 font-medium">Partie</th>
+                                        <!-- Joueurs -->
+                                    </tr>
+                                </thead>
+                                <tbody id="history-body" class="divide-y divide-gray-100 text-gray-700">
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SVGs d'icônes -->
+    <svg style="display:none;">
+        <symbol id="icon-hex" viewBox="0 0 24 24">
+            <path d="M12 2.5l8.5 5v9l-8.5 5-8.5-5v-9z" fill="currentColor"/>
+        </symbol>
+        <symbol id="icon-star" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
+        </symbol>
+    </svg>
+
+    <script>
+        let players = ['Architecte 1', 'Architecte 2'];
+        let scores = {};
+        let round = 1;
+        let chart = null;
+        let activeTab = 'input';
+        
+        const COLORS = ['#C5A059', '#1A365D', '#718096', '#2F855A', '#9B2C2C', '#D97706'];
+        
+        // Données des quartiers (Fonds colorés pleins, bordures, couleurs textes)
+        const QUARTERS = [
+            { id: 'blue', name: 'Habitations', bg: 'bg-blue-100', border: 'border-blue-300', text: 'text-blue-800', btn: 'text-blue-600 bg-white hover:bg-blue-50' },
+            { id: 'yellow', name: 'Marchés', bg: 'bg-yellow-100', border: 'border-yellow-400', text: 'text-yellow-800', btn: 'text-yellow-600 bg-white hover:bg-yellow-50' },
+            { id: 'red', name: 'Casernes', bg: 'bg-red-100', border: 'border-red-300', text: 'text-red-800', btn: 'text-red-600 bg-white hover:bg-red-50' },
+            { id: 'purple', name: 'Temples', bg: 'bg-purple-100', border: 'border-purple-300', text: 'text-purple-800', btn: 'text-purple-600 bg-white hover:bg-purple-50' },
+            { id: 'green', name: 'Jardins', bg: 'bg-emerald-100', border: 'border-emerald-300', text: 'text-emerald-800', btn: 'text-emerald-600 bg-white hover:bg-emerald-50' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPlayerList();
+        });
+
+        function renderPlayerList() {
+            const list = document.getElementById('player-list');
+            list.innerHTML = players.map((p, i) => {
+                const isDefault = /^Architecte \d+$/.test(p);
+                const displayValue = isDefault ? '' : p;
+                const placeholderValue = isDefault ? p : `Architecte ${i + 1}`;
+
+                return `
+                <div class="flex items-center gap-4 bg-white border border-gray-200 p-2 pl-4 group hover:border-akro-gold transition-colors">
+                    <input
+                        class="flex-1 bg-transparent border-none text-akro-dark font-sans text-sm font-semibold outline-none placeholder-gray-400"
+                        value="${displayValue}"
+                        placeholder="${placeholderValue}"
+                        onchange="updatePlayerName(${i}, this.value)"
+                    />
+                    ${players.length > 2 ? `
+                        <button type="button" onclick="removePlayer(${i})" class="w-8 h-8 flex items-center justify-center text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer text-xl">
+                            ×
+                        </button>
+                    ` : ''}
+                </div>
+            `}).join('');
+        }
+
+        function addPlayer() {
+            if (players.length < 6) {
+                players.push(`Architecte ${players.length + 1}`);
+                renderPlayerList();
+            }
+        }
+
+        function removePlayer(index) {
+            players.splice(index, 1);
+            renderPlayerList();
+        }
+
+        function updatePlayerName(index, name) {
+            players[index] = name.trim() || `Architecte ${index + 1}`;
+        }
+
+        function setActiveTab(tab) {
+            activeTab = tab;
+            const sectionInput = document.getElementById('section-input');
+            const sectionStats = document.getElementById('section-stats');
+            const tabInput = document.getElementById('tab-input');
+            const tabStats = document.getElementById('tab-stats');
+
+            if (tab === 'input') {
+                sectionInput.classList.remove('hidden');
+                sectionStats.classList.add('hidden', 'lg:block');
+                
+                tabInput.classList.add('text-akro-blue', 'border-akro-blue', 'bg-slate-50');
+                tabInput.classList.remove('text-gray-400', 'border-transparent');
+                
+                tabStats.classList.remove('text-akro-blue', 'border-akro-blue', 'bg-slate-50');
+                tabStats.classList.add('text-gray-400', 'border-transparent');
+            } else {
+                sectionInput.classList.add('hidden');
+                sectionStats.classList.remove('hidden');
+                
+                tabStats.classList.add('text-akro-blue', 'border-akro-blue', 'bg-slate-50');
+                tabStats.classList.remove('text-gray-400', 'border-transparent');
+                
+                tabInput.classList.remove('text-akro-blue', 'border-akro-blue', 'bg-slate-50');
+                tabInput.classList.add('text-gray-400', 'border-transparent');
+                
+                if (chart) setTimeout(() => chart.update(), 100);
+            }
+        }
+
+        function startGame() {
+            scores = {};
+            players.forEach(p => scores[p] = []);
+            round = 1;
+            
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            renderInputs();
+            updateScoreboard();
+            initChart();
+        }
+
+        function quitGame() {
+            if (confirm('Fuir la cité et retourner à l\'accueil ?')) {
+                document.getElementById('setup-screen').classList.remove('hidden');
+                document.getElementById('game-screen').classList.add('hidden');
+            }
+        }
+
+        function renderInputs() {
+            const container = document.getElementById('player-inputs');
+            document.getElementById('round-indicator').innerText = `PARTIE ${round}`;
+            
+            container.innerHTML = players.map((p, i) => `
+                <div class="bg-white rounded-2xl premium-shadow border border-gray-200 overflow-hidden">
+                    
+                    <!-- En-tête du joueur -->
+                    <div class="bg-akro-blue px-5 py-3 flex items-center justify-between">
+                        <span class="font-display font-bold tracking-[0.1em] text-white truncate text-lg">${p}</span>
+                        <div class="bg-white/10 px-3 py-1 rounded border border-white/20 flex items-center gap-2">
+                            <span class="text-[9px] text-akro-gold uppercase tracking-widest font-sans font-bold">Gloire</span>
+                            <span class="font-mono text-xl font-bold text-white" id="live-total-${i}">0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Grille 3 colonnes (Quartiers + Pierres) -->
+                    <div class="p-3 grid grid-cols-3 gap-3 bg-gray-50">
+                        ${QUARTERS.map(q => `
+                            <!-- Carte Quartier -->
+                            <div class="${q.bg} border ${q.border} rounded-xl p-2.5 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                                <!-- Décoration fond -->
+                                <svg class="absolute -bottom-4 -right-4 w-16 h-16 opacity-10 ${q.text}"><use href="#icon-hex"></use></svg>
+                                
+                                <div class="flex justify-between items-center mb-3 border-b border-black/10 pb-1.5 relative z-10">
+                                    <span class="${q.text} font-display font-bold text-xs uppercase flex items-center gap-1.5 tracking-wider">
+                                        <svg class="w-3.5 h-3.5"><use href="#icon-hex"></use></svg>
+                                        ${q.name}
+                                    </span>
+                                    <span class="${q.text} font-mono font-bold text-base" id="res-${i}-${q.id}">0</span>
+                                </div>
+                                
+                                <div class="space-y-2 relative z-10">
+                                    <!-- Stepper Tuiles -->
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[9px] ${q.text} font-bold uppercase tracking-widest opacity-80">⬡ Tuiles</span>
+                                        <div class="flex items-center bg-white/50 rounded border border-black/10 shadow-sm overflow-hidden">
+                                            <button type="button" class="stepper-btn w-6 h-6 ${q.btn} font-black text-sm flex items-center justify-center" onclick="adjustAkro(${i}, '${q.id}', 'val', -1)">-</button>
+                                            <span class="w-6 text-center font-mono text-sm font-bold ${q.text}" id="val-${i}-${q.id}">0</span>
+                                            <button type="button" class="stepper-btn w-6 h-6 ${q.btn} font-black text-sm flex items-center justify-center" onclick="adjustAkro(${i}, '${q.id}', 'val', 1)">+</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Stepper Étoiles -->
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[9px] ${q.text} font-bold uppercase tracking-widest opacity-80">⭐ Étoiles</span>
+                                        <div class="flex items-center bg-white/50 rounded border border-black/10 shadow-sm overflow-hidden">
+                                            <button type="button" class="stepper-btn w-6 h-6 ${q.btn} font-black text-sm flex items-center justify-center" onclick="adjustAkro(${i}, '${q.id}', 'star', -1)">-</button>
+                                            <span class="w-6 text-center font-mono text-sm font-bold ${q.text}" id="star-${i}-${q.id}">0</span>
+                                            <button type="button" class="stepper-btn w-6 h-6 ${q.btn} font-black text-sm flex items-center justify-center" onclick="adjustAkro(${i}, '${q.id}', 'star', 1)">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                        
+                        <!-- Carte Pierres -->
+                        <div class="bg-gray-200 border border-gray-300 rounded-xl p-2.5 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                            <div class="flex justify-between items-center mb-3 border-b border-black/10 pb-1.5 relative z-10">
+                                <span class="text-gray-700 font-display font-bold text-xs uppercase flex items-center gap-1.5 tracking-wider">
+                                    🪨 Pierres
+                                </span>
+                                <span class="text-gray-700 font-mono font-bold text-base" id="res-${i}-stone">0</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between mt-auto relative z-10">
+                                <span class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Nombre détenu : </span>
+                                <div class="flex items-center bg-white/50 rounded border border-black/10 shadow-sm overflow-hidden">
+                                    <button type="button" class="stepper-btn w-6 h-6 text-gray-600 bg-white hover:bg-gray-50 font-black text-sm flex items-center justify-center" onclick="adjustAkro(${i}, 'stone', 'val', -1)">-</button>
+                                    <span class="w-6 text-center font-mono text-sm font-bold text-gray-700" id="val-${i}-stone">0</span>
+                                    <button type="button" class="stepper-btn w-6 h-6 text-gray-600 bg-white hover:bg-gray-50 font-black text-sm flex items-center justify-center" onclick="adjustAkro(${i}, 'stone', 'val', 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Stepper: On autorise les négatifs pour être flexible
+        function adjustAkro(pIndex, qId, type, delta) {
+            const el = document.getElementById(`${type}-${pIndex}-${qId}`);
+            let val = parseInt(el.innerText) || 0;
+            val += delta;
+            el.innerText = val;
+            calcPlayer(pIndex);
+        }
+
+        function calcPlayer(pIndex) {
+            let grandTotal = 0;
+
+            QUARTERS.forEach(q => {
+                const val = parseInt(document.getElementById(`val-${pIndex}-${q.id}`).innerText) || 0;
+                const stars = parseInt(document.getElementById(`star-${pIndex}-${q.id}`).innerText) || 0;
+                const total = val * stars;
+                document.getElementById(`res-${pIndex}-${q.id}`).innerText = total;
+                grandTotal += total;
+            });
+
+            const stones = parseInt(document.getElementById(`val-${pIndex}-stone`).innerText) || 0;
+            document.getElementById(`res-${pIndex}-stone`).innerText = stones;
+            grandTotal += stones;
+
+            document.getElementById(`live-total-${pIndex}`).innerText = grandTotal;
+        }
+
+        function validateRound() {
+            players.forEach((p, i) => {
+                const total = parseInt(document.getElementById(`live-total-${i}`).innerText) || 0;
+                scores[p].push(total);
+            });
+            
+            round++;
+            
+            updateScoreboard();
+            updateChart();
+            updateHistory();
+            renderInputs();
+
+            if (activeTab === 'input' && window.innerWidth < 1024) {
+                setActiveTab('stats');
+            }
+        }
+
+        function updateScoreboard() {
+            const scoreboard = document.getElementById('scoreboard');
+            const totals = players.map((p, i) => ({ 
+                name: p, 
+                total: scores[p].reduce((a, b) => a + b, 0),
+                color: COLORS[i % COLORS.length]
+            }));
+            
+            totals.sort((a, b) => b.total - a.total); 
+            
+            scoreboard.innerHTML = totals.map((t, index) => {
+                const isLeader = index === 0 && scores[t.name].length > 0;
+
+                return `
+                <div class="px-6 py-4 ${isLeader ? 'bg-yellow-50/30' : 'bg-transparent'} hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="font-display font-bold text-gray-300 w-4">${index + 1}.</div>
+                            <span class="font-bold text-sm text-akro-dark font-sans">${t.name}</span>
+                            ${isLeader ? '<span class="text-lg" title="Architecte en chef">🏛️</span>' : ''}
+                        </div>
+                        <div class="font-mono text-xl font-bold ${isLeader ? 'text-akro-gold' : 'text-akro-blue'}">
+                            ${t.total}
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('evolutionChart').getContext('2d');
+            if (chart) chart.destroy();
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: players.map((p, i) => ({
+                        label: p,
+                        data: [],
+                        backgroundColor: COLORS[i % COLORS.length],
+                        borderRadius: 2,
+                        barPercentage: 0.7,
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: '#F3F4F6' },
+                            ticks: { font: { family: 'Share Tech Mono' } }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { font: { family: 'Montserrat', weight: '600' } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + ' pts';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            chart.data.labels = Array.from({length: round - 1}, (_, i) => `P${i + 1}`);
+            
+            players.forEach((p, i) => {
+                chart.data.datasets[i].data = [...scores[p]];
+            });
+            chart.update();
+        }
+
+        function updateHistory() {
+            const historySection = document.getElementById('history-section');
+            const historyBody = document.getElementById('history-body');
+            const headerRow = document.getElementById('history-header-row');
+            
+            if (scores[players[0]].length === 0) {
+                historySection.classList.add('hidden');
+                return;
+            }
+            
+            historySection.classList.remove('hidden');
+            
+            headerRow.innerHTML = `
+                <th class="p-4 font-sans font-medium text-xs tracking-widest text-gray-400">P.</th>
+            ` + players.map((p, i) => `
+                <th class="p-4 font-sans font-semibold text-xs tracking-wider border-l border-gray-100 truncate" style="color: ${COLORS[i % COLORS.length]}">
+                    ${p.substring(0, 4).toUpperCase()}.
+                </th>
+            `).join('');
+
+            const rowCount = scores[players[0]].length;
+            let rowsHtml = '';
+            for (let i = rowCount - 1; i >= 0; i--) {
+                let maxVal = -1;
+                players.forEach(p => { if (scores[p][i] > maxVal) maxVal = scores[p][i]; });
+
+                rowsHtml += `
+                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-mono font-bold text-gray-400 text-xs bg-gray-50/50">${i + 1}</td>
+                        ${players.map(p => {
+                            const isWinner = scores[p][i] === maxVal;
+                            return `
+                            <td class="p-4 border-l border-gray-100 font-mono font-bold text-sm ${isWinner ? 'text-akro-gold' : 'text-akro-dark'}">
+                                ${scores[p][i]} ${isWinner ? '<span class="text-xs">🏛️</span>' : ''}
+                            </td>
+                        `}).join('')}
+                    </tr>
+                `;
+            }
+            historyBody.innerHTML = rowsHtml;
+        }
+
+    </script>
+</body>
+</html>

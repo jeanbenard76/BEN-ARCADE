@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SKYJO — BEN'ARCADE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Black+Ops+One&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Outfit", "ui-sans-serif", "system-ui", "sans-serif"],
+                        mono: ["Share Tech Mono", "ui-monospace", "SFMono-Regular", "monospace"],
+                        display: ["Black Ops One", "cursive"],
+                    },
+                    colors: {
+                        accent: {
+                            cyan: '#006E7A',
+                            pink: '#D0004A',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#F5F5F2] text-[#111111] antialiased pb-20">
+    <div id="setup-screen">
+        <header class="bg-white border-b border-[#E2E2DC] px-5 py-4 flex items-center gap-4 sticky top-0 z-50">
+            <a href="index.html" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-[#666]"><path d="m15 18-6-6 6-6"/></svg>
+            </a>
+            <div>
+                <h1 class="font-display text-2xl tracking-wider text-accent-cyan uppercase">❄️ SKYJO</h1>
+                <p class="font-mono text-[10px] tracking-widest text-[#666]">LE MOINS DE POINTS POSSIBLE</p>
+            </div>
+        </header>
+
+        <main class="max-w-2xl mx-auto p-5">
+            <div class="bg-white border border-[#E2E2DC] rounded-lg p-6 shadow-sm">
+                <h2 class="font-mono text-xs tracking-[4px] text-accent-cyan uppercase mb-6">// Joueurs</h2>
+                <div id="player-list" class="space-y-3">
+                    <!-- Players will be injected here -->
+                </div>
+                <button onclick="addPlayer()" class="w-full mt-4 py-3 border border-dashed border-[#C8C8C0] text-[#666] font-mono text-[10px] tracking-widest hover:border-accent-cyan hover:text-accent-cyan transition-all rounded-md">
+                    + AJOUTER UN JOUEUR
+                </button>
+                <button onclick="startGame()" class="w-full mt-8 py-4 bg-accent-cyan text-white font-display text-lg tracking-widest rounded-md hover:opacity-90 transition-opacity uppercase">
+                    ▶ Lancer la partie
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <header class="bg-white border-b border-[#E2E2DC] px-5 py-4 flex items-center justify-between sticky top-0 z-50">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-[#666]"><path d="m15 18-6-6 6-6"/></svg>
+                </a>
+                <div>
+                    <h1 class="font-display text-xl tracking-wider text-accent-cyan uppercase">❄️ SKYJO</h1>
+                    <p id="round-indicator" class="font-mono text-[10px] tracking-widest text-[#666]">MANCHE 1</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="openSettings()" class="p-2 hover:bg-gray-100 rounded-full transition-colors text-[#666]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1.51 1 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <button onclick="quitGame()" class="px-4 py-2 border border-accent-pink text-accent-pink font-mono text-[10px] tracking-widest rounded-md hover:bg-pink-50 transition-colors uppercase">
+                    Quitter
+                </button>
+            </div>
+        </header>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div class="bg-white border border-[#E2E2DC] rounded-lg p-8 max-w-sm w-full shadow-2xl">
+                <h3 class="font-display text-2xl text-accent-cyan mb-6 uppercase tracking-wider">⚙️ Réglages</h3>
+                <div class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="font-mono text-[10px] text-[#666] uppercase tracking-widest">Limite de points</label>
+                        <div class="flex items-center gap-3">
+                            <input type="number" id="setting-limit" class="flex-1 bg-gray-50 border border-[#C8C8C0] rounded px-4 py-3 text-[#111] font-bold outline-none focus:border-accent-cyan" value="100">
+                            <span class="font-mono text-xs text-[#666]">pts</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="closeSettings()" class="w-full mt-8 py-4 bg-accent-cyan text-white font-display text-lg rounded-md shadow-lg hover:opacity-90 transition-all uppercase tracking-widest">
+                    Enregistrer
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Tab Navigation -->
+        <div class="lg:hidden flex border-b border-[#E2E2DC] bg-white sticky top-[72px] z-40">
+            <button onclick="setActiveTab('input')" id="tab-input" class="flex-1 py-3 flex items-center justify-center gap-2 font-mono text-[10px] tracking-widest transition-all text-accent-cyan border-b-2 border-accent-cyan bg-cyan-50/50">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                SAISIE
+            </button>
+            <button onclick="setActiveTab('stats')" id="tab-stats" class="flex-1 py-3 flex items-center justify-center gap-2 font-mono text-[10px] tracking-widest transition-all text-[#666]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                SCORES
+            </button>
+        </div>
+
+        <main class="max-w-5xl mx-auto p-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- Round Input -->
+                <section id="section-input" class="bg-white border border-[#E2E2DC] rounded-lg p-4 sm:p-6 shadow-sm">
+                    <h2 id="input-title" class="font-mono text-[11px] tracking-[4px] text-accent-cyan uppercase mb-6 pb-2 border-b border-[#E2E2DC]">
+                        // Résultats Manche 1
+                    </h2>
+                    <div id="round-inputs" class="grid grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4">
+                        <!-- Inputs will be injected here -->
+                    </div>
+                    <button onclick="validateRound()" class="w-full mt-8 py-4 bg-accent-cyan text-white font-display text-lg tracking-widest rounded-md hover:opacity-90 transition-opacity uppercase shadow-lg">
+                        Valider la Manche
+                    </button>
+                </section>
+
+                <!-- Stats -->
+                <div id="section-stats" class="space-y-4 hidden lg:block">
+                    <section class="bg-white border border-[#E2E2DC] rounded-lg overflow-hidden shadow-sm">
+                        <div class="bg-[#EEEEEA] px-4 py-2.5 border-b border-[#E2E2DC] font-mono text-[9px] tracking-[4px] text-[#666] uppercase">
+                            // Classement
+                        </div>
+                        <div id="scoreboard" class="divide-y divide-[#E2E2DC]">
+                            <!-- Scores will be injected here -->
+                        </div>
+                    </section>
+
+                    <section class="bg-white border border-[#E2E2DC] rounded-lg p-4 shadow-sm min-h-[250px] flex flex-col">
+                        <div class="font-mono text-[9px] tracking-[4px] text-[#666] uppercase mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><path d="m19 8-4 4-4-4"/><path d="m5 16 4-4 4 4"/></svg> // Évolution
+                        </div>
+                        <div class="flex-1">
+                            <canvas id="evolutionChart"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- History -->
+                    <section id="history-section" class="bg-white border border-[#E2E2DC] rounded-lg overflow-hidden shadow-sm hidden">
+                        <div class="bg-[#EEEEEA] px-4 py-2.5 border-b border-[#E2E2DC] font-mono text-[9px] tracking-[4px] text-[#666] uppercase">
+                            // Historique des manches
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-center text-[10px] border-collapse">
+                                <thead>
+                                    <tr id="history-header-row" class="bg-gray-50 border-b border-[#E2E2DC]">
+                                        <th class="p-2 font-mono text-[8px] tracking-widest text-[#666]">#</th>
+                                        <!-- Player names injected -->
+                                    </tr>
+                                </thead>
+                                <tbody id="history-body" class="divide-y divide-[#E2E2DC]">
+                                    <!-- History rows injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let players = ['', '', ''];
+        let scores = {};
+        let round = 1;
+        let chart = null;
+        let activeTab = 'input';
+        let CONFIG = {
+            scoreLimit: 100
+        };
+        const COLORS = ['#006E7A', '#B84A00', '#1A7A00', '#D0004A', '#5A00B8', '#8A7000'];
+
+        function renderPlayerList() {
+            const list = document.getElementById('player-list');
+            list.innerHTML = players.map((p, i) => `
+                <div class="flex items-center gap-3">
+                    <div class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${COLORS[i % COLORS.length]}"></div>
+                    <input
+                        class="flex-1 bg-white border border-[#C8C8C0] rounded-md px-4 py-2.5 font-sans text-base font-semibold outline-none focus:border-accent-cyan transition-colors"
+                        value="${p}" 
+                        oninput="updatePlayerName(${i}, this.value)"
+                        placeholder="Joueur ${i + 1}"
+                    />
+                    ${players.length > 2 ? `
+                        <button onclick="removePlayer(${i})" class="p-2 text-[#AAAAAA] hover:text-accent-pink transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        function openSettings() {
+            document.getElementById('setting-limit').value = CONFIG.scoreLimit;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            CONFIG.scoreLimit = parseInt(document.getElementById('setting-limit').value) || 100;
+            document.getElementById('settings-modal').classList.add('hidden');
+            updateScoreboard();
+        }
+
+        function updatePlayerName(index, name) {
+            players[index] = name;
+        }
+
+        function setActiveTab(tab) {
+            activeTab = tab;
+            const sectionInput = document.getElementById('section-input');
+            const sectionStats = document.getElementById('section-stats');
+            const tabInput = document.getElementById('tab-input');
+            const tabStats = document.getElementById('tab-stats');
+
+            if (tab === 'input') {
+                sectionInput.classList.remove('hidden');
+                sectionStats.classList.add('hidden', 'lg:block');
+                tabInput.classList.add('text-accent-cyan', 'border-accent-cyan', 'bg-cyan-50/50');
+                tabInput.classList.remove('text-[#666]');
+                tabStats.classList.remove('text-accent-cyan', 'border-accent-cyan', 'bg-cyan-50/50');
+                tabStats.classList.add('text-[#666]');
+            } else {
+                sectionInput.classList.add('hidden');
+                sectionStats.classList.remove('hidden');
+                tabStats.classList.add('text-accent-cyan', 'border-accent-cyan', 'bg-cyan-50/50');
+                tabStats.classList.remove('text-[#666]');
+                tabInput.classList.remove('text-accent-cyan', 'border-accent-cyan', 'bg-cyan-50/50');
+                tabInput.classList.add('text-[#666]');
+                if (chart) {
+                    setTimeout(() => chart.update(), 100);
+                }
+            }
+        }
+
+        function addPlayer() {
+            if (players.length < 8) {
+                players.push(''); // On ajoute une chaîne vide
+                renderPlayerList();
+            }
+        }
+
+        function startGame() {
+            // Si un nom est vide, on utilise son placeholder "Joueur X" par défaut
+            players = players.map((p, i) => p.trim() === '' ? `Joueur ${i + 1}` : p);
+            
+            scores = {};
+            players.forEach(p => scores[p] = []);
+            round = 1;
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            renderRoundInputs();
+            updateScoreboard();
+            initChart();
+        }
+
+        function removePlayer(index) {
+            players.splice(index, 1);
+            renderPlayerList();
+        }
+
+        function quitGame() {
+            if (confirm('Quitter la partie ?')) {
+                document.getElementById('setup-screen').classList.remove('hidden');
+                document.getElementById('game-screen').classList.add('hidden');
+            }
+        }
+
+        function renderRoundInputs() {
+            const container = document.getElementById('round-inputs');
+            document.getElementById('round-indicator').innerText = `MANCHE ${round}`;
+            document.getElementById('input-title').innerText = `// Résultats Manche ${round}`;
+            
+            container.innerHTML = players.map((p, i) => `
+                <div class="flex flex-col p-3 sm:p-4 bg-[#F8F8F5] border border-[#E2E2DC] rounded-md gap-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full shrink-0" style="background-color: ${COLORS[i % COLORS.length]}"></div>
+                        <span class="font-bold text-xs sm:text-sm truncate">${p}</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="flex items-center gap-1 w-full">
+                            <button onclick="adjustInput('${p}', -5)" class="flex-1 h-10 sm:h-14 border-2 border-[#C8C8C0] bg-white rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-gray-50 font-mono font-black text-sm sm:text-lg text-[#666] active:scale-95 transition-all shadow-sm">-5</button>
+                            <input type="number" id="input-${p}" class="w-12 sm:w-24 h-10 sm:h-14 text-center font-mono font-black text-lg sm:text-3xl bg-white border-2 border-[#C8C8C0] rounded-lg sm:rounded-xl outline-none focus:border-accent-cyan shadow-sm" value="0">
+                            <button onclick="adjustInput('${p}', 5)" class="flex-1 h-10 sm:h-14 border-2 border-[#C8C8C0] bg-white rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-gray-50 font-mono font-black text-sm sm:text-lg text-[#666] active:scale-95 transition-all shadow-sm">+5</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function adjustInput(player, val) {
+            const input = document.getElementById(`input-${player}`);
+            input.value = parseInt(input.value) + val;
+        }
+
+        function validateRound() {
+            players.forEach(p => {
+                const val = parseInt(document.getElementById(`input-${p}`).value) || 0;
+                scores[p].push(val);
+            });
+            round++;
+            renderRoundInputs();
+            updateScoreboard();
+            updateChart();
+            updateHistory();
+            
+            if (activeTab === 'input' && window.innerWidth < 1024) {
+                setActiveTab('stats');
+            }
+        }
+
+        function updateScoreboard() {
+            const scoreboard = document.getElementById('scoreboard');
+            const totals = players.map((p, i) => ({ 
+                name: p, 
+                total: scores[p].reduce((a, b) => a + b, 0),
+                color: COLORS[i % COLORS.length]
+            }));
+            
+            const minTotal = Math.min(...totals.map(t => t.total));
+
+            scoreboard.innerHTML = totals.map((t, i) => {
+                const rawProgress = (t.total / CONFIG.scoreLimit) * 100;
+                const progressWidth = Math.min(100, Math.max(0, rawProgress)); 
+                const isDanger = t.total >= (CONFIG.scoreLimit - 20);
+                const isLeader = t.total === minTotal && scores[t.name].length > 0;
+
+                return `
+                <div class="px-4 py-3 ${isLeader ? 'bg-cyan-50/50' : 'bg-white'}">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0" style="background-color: ${t.color}">
+                                ${t.name[0].toUpperCase()}
+                            </div>
+                            <span class="font-bold text-sm text-[#111] font-sans">${t.name}</span>
+                            ${isLeader ? '<span class="text-base" title="En tête !">❄️</span>' : ''}
+                        </div>
+                        <div class="font-mono text-xl font-bold ${isDanger ? 'text-accent-pink' : 'text-accent-cyan'}">
+                            ${t.total} <span class="text-[10px] opacity-60">/ ${CONFIG.scoreLimit}</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden border border-[#E2E2DC]">
+                        <div class="h-full rounded-full transition-all duration-500 ${isDanger ? 'bg-accent-pink' : 'bg-accent-cyan'}" style="width: ${progressWidth}%"></div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('evolutionChart').getContext('2d');
+            if (chart) chart.destroy();
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Début'],
+                    datasets: players.map((p, i) => ({
+                        label: p,
+                        data: [0],
+                        borderColor: COLORS[i % COLORS.length],
+                        backgroundColor: COLORS[i % COLORS.length],
+                        borderWidth: 3,
+                        tension: 0.1
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            chart.data.labels.push(`M${round - 1}`);
+            players.forEach((p, i) => {
+                const runningTotal = scores[p].reduce((a, b) => a + b, 0);
+                chart.data.datasets[i].data.push(runningTotal);
+            });
+            chart.update();
+        }
+
+        function updateHistory() {
+            const historySection = document.getElementById('history-section');
+            const historyBody = document.getElementById('history-body');
+            const headerRow = document.getElementById('history-header-row');
+            
+            if (scores[players[0]].length === 0) {
+                historySection.classList.add('hidden');
+                return;
+            }
+            
+            historySection.classList.remove('hidden');
+            
+            // Update headers
+            headerRow.innerHTML = `
+                <th class="p-2 font-mono text-[8px] tracking-widest text-[#666]">#</th>
+            ` + players.map(p => `
+                <th class="p-2 font-mono text-[8px] tracking-widest text-[#666] border-l border-[#E2E2DC] truncate">
+                    ${p.toUpperCase()}
+                </th>
+            `).join('');
+
+            // Update body
+            const rowCount = scores[players[0]].length;
+            let rowsHtml = '';
+            for (let i = 0; i < rowCount; i++) {
+                rowsHtml += `
+                    <tr class="border-b border-[#E2E2DC]">
+                        <td class="p-2 font-mono text-accent-cyan text-[10px] bg-gray-50">${i + 1}</td>
+                        ${players.map(p => `
+                            <td class="p-2 border-l border-[#E2E2DC] font-mono font-bold text-sm">
+                                ${scores[p][i]}
+                            </td>
+                        `).join('')}
+                    </tr>
+                `;
+            }
+            historyBody.innerHTML = rowsHtml;
+        }
+
+        renderPlayerList();
+    </script>
+</body>
+</html>
