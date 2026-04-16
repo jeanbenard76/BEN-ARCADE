@@ -49,7 +49,7 @@
     </style>
 </head>
 <body class="bg-[#0a1428] text-[#f4f1e8] font-riuka relative overflow-x-hidden min-h-screen">
-    <audio id="pirate-music" src="https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a01251.mp3" loop></audio>
+    <audio id="pirate-music" src="skullking.mp3" loop></audio>
 
     <div id="setup-screen" class="relative z-10">
         <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-20 sea-bg"></div>
@@ -86,22 +86,29 @@
     <div id="game-screen" class="hidden relative z-10">
         <header class="bg-[#0a1428]/90 border-b border-white/10 p-4 flex items-center justify-between sticky top-0 backdrop-blur-xl z-50">
             <div class="flex items-center gap-4">
-                <a href="index.html" class="p-2 hover:bg-white/5 rounded-full transition-colors">
+                <a href="index.html" class="p-2 hover:bg-white/5 rounded-full transition-colors hidden sm:block">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-pirate-gold"><path d="m15 18-6-6 6-6"/></svg>
                 </a>
                 <div>
-                    <h1 class="font-lacheyard text-2xl text-pirate-gold tracking-widest">Skull King</h1>
-                    <p id="round-indicator" class="font-riuka text-[9px] tracking-[3px] opacity-40 uppercase">Manche 1</p>
+                    <h1 class="font-lacheyard text-2xl text-pirate-gold tracking-widest hidden sm:block">Skull King</h1>
+                    <p id="round-indicator" class="font-riuka text-[11px] font-bold tracking-[3px] text-pirate-gold uppercase sm:opacity-40">Manche 1</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="openSettings()" class="p-2 hover:bg-white/5 rounded-full transition-colors text-pirate-gold">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <div class="flex items-center gap-1 sm:gap-3">
+                <button onclick="undo()" id="btn-undo" class="px-2 sm:px-3 py-2 bg-white/5 border border-white/10 text-white/80 font-riuka text-[10px] tracking-widest rounded-xl hover:bg-white/10 transition-all uppercase flex items-center gap-1">
+                    <span class="hidden sm:inline">⏪ Retour</span>
+                    <span class="sm:hidden">⏪</span>
                 </button>
+
                 <button onclick="toggleMusic()" class="p-2 hover:bg-white/5 rounded-full transition-colors text-pirate-gold">
                     <span id="music-icon-game">🔇</span>
                 </button>
-                <button onclick="quitGame()" class="px-4 py-2 bg-white/5 border border-white/10 text-white/60 font-riuka text-[10px] tracking-widest rounded-xl hover:bg-white/10 transition-all uppercase">
+
+                <button onclick="openSettings()" class="p-2 hover:bg-white/5 rounded-full transition-colors text-pirate-gold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 a2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+
+                <button onclick="quitGame()" class="px-3 sm:px-4 py-2 bg-white/5 border border-white/10 text-white/60 font-riuka text-[10px] tracking-widest rounded-xl hover:bg-white/10 transition-all uppercase">
                     Quitter
                 </button>
             </div>
@@ -175,8 +182,8 @@
                                 <div id="bid-status" class="hidden px-3 py-1 rounded font-mono text-xs font-bold border bg-orange-900/50 border-orange-500 text-orange-200"></div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button id="bonus-toggle" onclick="toggleBonusView()" class="hidden flex items-center gap-2 px-3 py-2 rounded-lg border font-riuka text-[10px] font-bold transition-all bg-white/5 text-pirate-gold border-white/10">
-                                    Voir Bonus
+                                <button id="bonus-toggle" onclick="toggleBonusView()" class="hidden flex items-center gap-2 px-3 py-2 rounded-lg border font-riuka text-[10px] font-bold transition-all bg-white/5 text-pirate-gold border-white/10 hover:bg-white/10">
+                                    Options Supplémentaires
                                 </button>
                                 <label class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
                                     <span class="text-xl">🐙</span>
@@ -256,7 +263,13 @@
         };
         const COLORS = ['#FFD700', '#D0004A', '#006E7A', '#1A7A00', '#5A00B8', '#B84A00'];
 
-        let currentRoundState = { bids: {}, won: {}, bonuses: {} };
+        let currentRoundState = { bids: {}, won: {}, bonuses: {}, rascal: {} };
+
+        // Icons SVG pour les boutons - Meilleure lisibilité
+        const iconMinus = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>`;
+        const iconPlus = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
+        const iconMinusSm = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>`;
+        const iconPlusSm = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
 
         function renderPlayerList() {
             const list = document.getElementById('player-list');
@@ -266,7 +279,6 @@
                         type="text"
                         class="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-[#f4f1e8] font-riuka font-medium outline-none focus:border-pirate-gold/50 focus:bg-white/10 transition-all"
                         placeholder="Pirate ${i + 1}"
-                        /* On garde la valeur vide au début, ou on affiche le nom s'il a été saisi */
                         value="${p.startsWith('Pirate ') ? '' : p}" 
                         onchange="players[${i}] = this.value || 'Pirate ${i + 1}'"
                     />
@@ -281,7 +293,6 @@
 
         function addPlayer() {
             if (players.length < 8) {
-                // On ajoute la chaîne générique pour maintenir l'index
                 players.push(`Pirate ${players.length + 1}`);
                 renderPlayerList();
             }
@@ -365,18 +376,30 @@
             currentRound = 1;
             rounds = {};
             phase = 'betting';
+            showBonuses = false;
             
             // Initialize round state
-            currentRoundState = { bids: {}, won: {}, bonuses: {} };
+            currentRoundState = { bids: {}, won: {}, bonuses: {}, rascal: {} };
             players.forEach(p => {
                 currentRoundState.bids[p] = 0;
                 currentRoundState.won[p] = 0;
                 currentRoundState.bonuses[p] = { cards14: 0, mermaidPirate: 0, pirateSK: 0, skMermaid: 0 };
+                currentRoundState.rascal[p] = 0;
             });
+
+            // Reset UI cleanly for new games or replays
+            document.getElementById('phase-indicator').innerText = 'PHASE DE PARIS';
+            document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400';
+            document.getElementById('main-action-btn').innerText = '⚓ Terminer les paris';
+            document.getElementById('main-action-btn').onclick = nextPhase;
+            document.getElementById('main-action-btn').classList.remove('hidden');
+            document.getElementById('bonus-toggle').classList.add('hidden');
+            document.getElementById('kraken-played').checked = false;
 
             renderInputs();
             updateScoreboard();
             initChart();
+            updateHistory(); // clears history section
             
             if (activeTab === 'input' && window.innerWidth < 1024) {
                 setActiveTab('input');
@@ -384,9 +407,61 @@
         }
 
         function quitGame() {
-            if (confirm('Quitter la partie ?')) {
+            let msg = Object.keys(rounds).length === 10 ? 'Retourner à la gestion de l\'équipage ?' : 'Quitter la partie ? Vous perdrez la progression en cours.';
+            if (confirm(msg)) {
                 document.getElementById('setup-screen').classList.remove('hidden');
                 document.getElementById('game-screen').classList.add('hidden');
+            }
+        }
+
+        // Logic for Undo ⏪
+        function undo() {
+            if (phase === 'results') {
+                // If in results phase, just go back to betting phase of the same round
+                phase = 'betting';
+                document.getElementById('phase-indicator').innerText = 'PHASE DE PARIS';
+                document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400';
+                document.getElementById('bonus-toggle').classList.add('hidden');
+                document.getElementById('main-action-btn').innerText = '⚓ Terminer les paris';
+                document.getElementById('main-action-btn').onclick = nextPhase;
+                
+                showBonuses = false;
+                
+                renderInputs();
+                updateScorePreviews();
+            } else if (phase === 'betting' && currentRound > 1) {
+                // If in betting phase and not round 1, go back to results phase of PREVIOUS round
+                if(confirm(`Revenir à la manche ${currentRound - 1} ? Les scores de cette manche seront ouverts à la correction.`)){
+                    currentRound--;
+                    
+                    // Reload state from previous round
+                    let prevData = rounds[currentRound];
+                    currentRoundState = { bids: {}, won: {}, bonuses: {}, rascal: {} };
+                    players.forEach(p => {
+                        currentRoundState.bids[p] = prevData.details[p].bid;
+                        currentRoundState.won[p] = prevData.details[p].won;
+                        currentRoundState.bonuses[p] = { ...prevData.details[p].bonusDetails };
+                        currentRoundState.rascal[p] = prevData.details[p].rascal || 0;
+                    });
+                    
+                    // Remove the previous round from recorded history
+                    delete rounds[currentRound];
+                    
+                    phase = 'results';
+                    document.getElementById('phase-indicator').innerText = 'PHASE DE RÉSULTATS (CORRECTION)';
+                    document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-orange-500/10 border-orange-500/30 text-orange-400';
+                    document.getElementById('bonus-toggle').classList.remove('hidden');
+                    document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Options' : 'Options Supplémentaires';
+                    
+                    document.getElementById('main-action-btn').innerText = '⚔️ Valider la manche';
+                    document.getElementById('main-action-btn').onclick = validateRound;
+                    
+                    renderInputs();
+                    updateScorePreviews();
+                    updateScoreboard();
+                    updateChart();
+                    updateHistory();
+                }
             }
         }
 
@@ -395,10 +470,21 @@
             document.getElementById('round-indicator').innerText = `Manche ${currentRound}`;
             document.getElementById('round-title').innerText = `Manche ${currentRound}`;
             
+            // Handle Undo Button status
+            const undoBtn = document.getElementById('btn-undo');
+            if (undoBtn) {
+                if (currentRound === 1 && phase === 'betting') {
+                    undoBtn.classList.add('opacity-30', 'pointer-events-none');
+                } else {
+                    undoBtn.classList.remove('opacity-30', 'pointer-events-none');
+                }
+            }
+            
             container.innerHTML = players.map((p, i) => {
                 const isStarter = i === (currentRound - 1) % players.length;
                 const bid = currentRoundState.bids[p] || 0;
                 const won = currentRoundState.won[p] || 0;
+                const rascalBet = currentRoundState.rascal[p] || 0;
 
                 return `
                     <div class="bg-white/5 border ${isStarter ? 'border-pirate-gold/40 shadow-[0_0_20px_rgba(255,215,0,0.1)]' : 'border-white/5'} rounded-2xl p-4 sm:p-6 transition-all backdrop-blur-sm">
@@ -417,26 +503,47 @@
                             <div class="space-y-2">
                                 <label class="text-[9px] font-riuka text-white/30 uppercase tracking-widest">Pari</label>
                                 <div class="flex items-center gap-2">
-                                    <button onclick="adjustVal('${p}', 'bid', -1)" ${phase === 'results' ? 'disabled' : ''} class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 active:scale-90 transition-all disabled:opacity-20">➖</button>
-                                    <input type="number" id="bid-${p}" ${phase === 'results' ? 'disabled' : ''} class="w-full h-10 bg-white/10 border border-white/10 rounded-xl px-1 text-white font-bold text-center text-sm outline-none focus:border-pirate-gold/30 disabled:opacity-50" value="${bid}" onchange="currentRoundState.bids['${p}'] = parseInt(this.value) || 0; updateBidStatus(); updateScorePreviews();">
-                                    <button onclick="adjustVal('${p}', 'bid', 1)" ${phase === 'results' ? 'disabled' : ''} class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 active:scale-90 transition-all disabled:opacity-20">➕</button>
+                                    <button onclick="adjustVal('${p}', 'bid', -1)" ${phase === 'results' ? 'disabled' : ''} class="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 active:scale-90 transition-all disabled:opacity-20 text-white shadow-sm">${iconMinus}</button>
+                                    <input type="number" inputmode="numeric" pattern="[0-9]* "id="bid-${p}" ${phase === 'results' ? 'disabled' : ''} class="w-full h-10 bg-white/10 border border-white/10 rounded-xl px-1 text-white font-bold text-center text-sm outline-none focus:border-pirate-gold/30 disabled:opacity-50" placeholder="0" onchange="currentRoundState.bids['${p}'] = parseInt(this.value) || 0; updateBidStatus(); updateScorePreviews();">
+                                    <button onclick="adjustVal('${p}', 'bid', 1)" ${phase === 'results' ? 'disabled' : ''} class="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 active:scale-90 transition-all disabled:opacity-20 text-white shadow-sm">${iconPlus}</button>
                                 </div>
                             </div>
                             <div class="${phase === 'betting' ? 'hidden' : ''} space-y-2">
                                 <label class="text-[9px] font-riuka text-white/30 uppercase tracking-widest">Fait</label>
                                 <div class="flex items-center gap-2">
-                                    <button onclick="adjustVal('${p}', 'won', -1)" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 active:scale-90 transition-all">➖</button>
-                                    <input type="number" id="won-${p}" class="w-full h-10 bg-white/10 border border-white/10 rounded-xl px-1 text-white font-bold text-center text-sm outline-none focus:border-pirate-gold/30" value="${won}" onchange="currentRoundState.won['${p}'] = parseInt(this.value) || 0; updateScorePreviews();">
-                                    <button onclick="adjustVal('${p}', 'won', 1)" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 active:scale-90 transition-all">➕</button>
+                                    <button onclick="adjustVal('${p}', 'won', -1)" class="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 active:scale-90 transition-all text-white shadow-sm">${iconMinus}</button>
+                                    <input type="number" inputmode="numeric" pattern="[0-9]* "id="won-${p}" class="w-full h-10 bg-white/10 border border-white/10 rounded-xl px-1 text-white font-bold text-center text-sm outline-none focus:border-pirate-gold/30" placeholder="0" onchange="currentRoundState.won['${p}'] = parseInt(this.value) || 0; updateScorePreviews();">
+                                    <button onclick="adjustVal('${p}', 'won', 1)" class="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 active:scale-90 transition-all text-white shadow-sm">${iconPlus}</button>
                                 </div>
                             </div>
                         </div>
-                        <div id="bonus-area-${p}" class="${phase === 'results' && showBonuses ? '' : 'hidden'} mt-3 pt-2 border-t border-pirate-gold/10 space-y-2">
+                        <div id="bonus-area-${p}" class="${phase === 'results' && showBonuses ? '' : 'hidden'} mt-3 pt-2 border-t border-pirate-gold/10">
+                            
                             <div class="grid grid-cols-1 gap-y-2">
                                 ${renderBonusRow(p, 'cards14', `Cartes 14 (+${CONFIG.bonusC14})`)}
                                 ${renderBonusRow(p, 'mermaidPirate', `Sirène/Pirate (+${CONFIG.bonusSP})`)}
                                 ${renderBonusRow(p, 'pirateSK', `Pirate/SK (+${CONFIG.bonusPSK})`)}
                                 ${renderBonusRow(p, 'skMermaid', `SK/Sirène (+${CONFIG.bonusSKS})`)}
+                            </div>
+
+                            <!-- Pouvoirs Avancés -->
+                            <div class="mt-4 mb-2 text-[9px] font-riuka text-pirate-gold uppercase tracking-widest border-b border-pirate-gold/20 pb-1">Pouvoirs & Ajustements</div>
+                            
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <label class="text-[8px] font-riuka text-white/30 uppercase tracking-widest truncate">Rascal (Pari)</label>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="rascal-btn-${p}-0" onclick="setRascal('${p}', 0)" class="w-8 h-7 text-xs rounded transition-all ${rascalBet === 0 ? 'bg-pirate-gold text-black font-bold shadow-[0_0_10px_rgba(255,215,0,0.3)]' : 'bg-white/10 border border-white/20 text-white/90 hover:bg-white/20'}">0</button>
+                                    <button id="rascal-btn-${p}-10" onclick="setRascal('${p}', 10)" class="w-8 h-7 text-xs rounded transition-all ${rascalBet === 10 ? 'bg-pirate-gold text-black font-bold shadow-[0_0_10px_rgba(255,215,0,0.3)]' : 'bg-white/10 border border-white/20 text-white/90 hover:bg-white/20'}">10</button>
+                                    <button id="rascal-btn-${p}-20" onclick="setRascal('${p}', 20)" class="w-8 h-7 text-xs rounded transition-all ${rascalBet === 20 ? 'bg-pirate-gold text-black font-bold shadow-[0_0_10px_rgba(255,215,0,0.3)]' : 'bg-white/10 border border-white/20 text-white/90 hover:bg-white/20'}">20</button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-2">
+                                <label class="text-[8px] font-riuka text-white/30 uppercase tracking-widest truncate">Ajuster Pari (Harry)</label>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="adjustVal('${p}', 'bid', -1)" class="w-7 h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all text-white shadow-sm">${iconMinusSm}</button>
+                                    <button onclick="adjustVal('${p}', 'bid', 1)" class="w-7 h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all text-white shadow-sm">${iconPlusSm}</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -452,21 +559,47 @@
                 <div class="flex items-center justify-between gap-2">
                     <label class="text-[8px] font-riuka text-white/30 uppercase tracking-widest leading-none truncate">${label}</label>
                     <div class="flex items-center gap-2">
-                        <button onclick="adjustBonus('${player}', '${key}', -1)" class="p-1 bg-white/5 rounded-lg hover:bg-white/10">➖</button>
-                        <span id="bonus-${player}-${key}" class="font-mono text-xs text-pirate-gold font-bold min-w-[15px] text-center">${val}</span>
-                        <button onclick="adjustBonus('${player}', '${key}', 1)" class="p-1 bg-white/5 rounded-lg hover:bg-white/10">➕</button>
+                        <button onclick="adjustBonus('${player}', '${key}', -1)" class="w-7 h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 text-white shadow-sm">${iconMinusSm}</button>
+                        <span id="bonus-${player}-${key}" class="font-mono text-sm text-pirate-gold font-bold min-w-[20px] text-center">${val}</span>
+                        <button onclick="adjustBonus('${player}', '${key}', 1)" class="w-7 h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 text-white shadow-sm">${iconPlusSm}</button>
                     </div>
                 </div>
             `;
         }
 
+        function setRascal(player, value) {
+            if (!currentRoundState.rascal) currentRoundState.rascal = {};
+            currentRoundState.rascal[player] = value;
+            
+            // Mettre à jour visuellement les boutons sans recharger tout l'affichage
+            [0, 10, 20].forEach(val => {
+                const btn = document.getElementById(`rascal-btn-${player}-${val}`);
+                if (btn) {
+                    if (val === value) {
+                        btn.className = "w-8 h-7 text-xs rounded transition-all bg-pirate-gold text-black font-bold shadow-[0_0_10px_rgba(255,215,0,0.3)]";
+                    } else {
+                        btn.className = "w-8 h-7 text-xs rounded transition-all bg-white/10 border border-white/20 text-white/90 hover:bg-white/20";
+                    }
+                }
+            });
+
+            updateScorePreviews();
+        }
+
         function adjustVal(player, type, val) {
             const input = document.getElementById(`${type}-${player}`);
-            const newVal = Math.max(0, parseInt(input.value) + val);
-            input.value = newVal;
+            // On récupère la valeur actuelle, si vide on prend 0
+            let currentVal = parseInt(input.value) || 0;
+            const newVal = Math.max(0, currentVal + val);
             
-            if (type === 'bid') currentRoundState.bids[player] = newVal;
-            else currentRoundState.won[player] = newVal;
+            // Si la nouvelle valeur est 0, on vide le champ pour voir le placeholder
+            input.value = (newVal === 0) ? '' : newVal;
+            
+            if (type === 'bid') {
+                currentRoundState.bids[player] = newVal;
+            } else {
+                currentRoundState.won[player] = newVal;
+            }
             
             updateBidStatus();
             updateScorePreviews();
@@ -487,6 +620,7 @@
             players.forEach(p => {
                 const bid = currentRoundState.bids[p] || 0;
                 const won = phase === 'betting' ? bid : (currentRoundState.won[p] || 0);
+                const rascalBet = currentRoundState.rascal[p] || 0;
                 
                 let bonus = 0;
                 if (phase === 'results') {
@@ -500,8 +634,10 @@
                 let score = 0;
                 if (bid === won) {
                     score = bid === 0 ? currentRound * 10 : bid * 20;
+                    score += rascalBet; // Victoire du pari Rascal
                 } else {
                     score = bid === 0 ? -currentRound * 10 : -Math.abs(bid - won) * 10;
+                    score -= rascalBet; // Défaite du pari Rascal
                 }
                 score += bonus;
 
@@ -536,6 +672,7 @@
                 document.getElementById('phase-indicator').innerText = 'PHASE DE RÉSULTATS';
                 document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-pirate-red/10 border-pirate-red/30 text-pirate-red';
                 document.getElementById('bonus-toggle').classList.remove('hidden');
+                document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Options' : 'Options Supplémentaires';
                 document.getElementById('main-action-btn').innerText = '⚔️ Valider la manche';
                 document.getElementById('main-action-btn').onclick = validateRound;
                 renderInputs();
@@ -565,6 +702,8 @@
             players.forEach(p => {
                 const bid = currentRoundState.bids[p] || 0;
                 const won = currentRoundState.won[p] || 0;
+                const rascalBet = currentRoundState.rascal[p] || 0;
+                
                 const bonusDetails = currentRoundState.bonuses[p] || { cards14: 0, mermaidPirate: 0, pirateSK: 0, skMermaid: 0 };
                 const bonus = (bonusDetails.cards14 || 0) * CONFIG.bonusC14 +
                               (bonusDetails.mermaidPirate || 0) * CONFIG.bonusSP +
@@ -574,25 +713,29 @@
                 let score = 0;
                 if (bid === won) {
                     score = bid === 0 ? currentRound * 10 : bid * 20;
+                    score += rascalBet;
                 } else {
                     score = bid === 0 ? -currentRound * 10 : -Math.abs(bid - won) * 10;
+                    score -= rascalBet;
                 }
                 score += bonus;
                 roundResults.scores[p] = score;
-                roundResults.details[p] = { bid, won, bonus, bonusDetails };
+                roundResults.details[p] = { bid, won, bonus, bonusDetails, rascal: rascalBet };
             });
 
             rounds[currentRound] = roundResults;
             if (currentRound < 10) {
                 currentRound++;
                 phase = 'betting';
+                showBonuses = false;
                 
                 // Reset round state
-                currentRoundState = { bids: {}, won: {}, bonuses: {} };
+                currentRoundState = { bids: {}, won: {}, bonuses: {}, rascal: {} };
                 players.forEach(p => {
                     currentRoundState.bids[p] = 0;
                     currentRoundState.won[p] = 0;
                     currentRoundState.bonuses[p] = { cards14: 0, mermaidPirate: 0, pirateSK: 0, skMermaid: 0 };
+                    currentRoundState.rascal[p] = 0;
                 });
 
                 document.getElementById('phase-indicator').innerText = 'PHASE DE PARIS';
@@ -601,6 +744,7 @@
                 document.getElementById('main-action-btn').innerText = '⚓ Terminer les paris';
                 document.getElementById('main-action-btn').onclick = nextPhase;
                 document.getElementById('kraken-played').checked = false;
+                
                 renderInputs();
                 updateScoreboard();
                 updateChart();
@@ -610,19 +754,33 @@
                     setActiveTab('stats');
                 }
             } else {
-                alert('Partie terminée !');
                 updateScoreboard();
                 updateChart();
                 updateHistory();
+                
+                document.getElementById('phase-indicator').innerText = 'PARTIE TERMINÉE';
+                document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-pirate-gold/10 border-pirate-gold/30 text-pirate-gold';
+                
+                // Transformation du bouton principal pour Rejouer directement
+                const mainBtn = document.getElementById('main-action-btn');
+                mainBtn.innerText = '🏴‍☠️ Rejouer (Même équipage)';
+                mainBtn.onclick = startGame;
+                mainBtn.classList.remove('hidden');
+
+                document.getElementById('bonus-toggle').classList.add('hidden');
+                document.getElementById('player-inputs').innerHTML = ''; // Cacher les inputs
+                
                 if (activeTab === 'input' && window.innerWidth < 1024) {
                     setActiveTab('stats');
                 }
+                
+                setTimeout(() => showAlert("La partie est terminée ! Le vainqueur va pouvoir s'en mettre plein les poches !"), 500);
             }
         }
 
         function toggleBonusView() {
             showBonuses = !showBonuses;
-            document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Bonus' : 'Voir Bonus';
+            document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Options' : 'Options Supplémentaires';
             players.forEach(p => {
                 const area = document.getElementById(`bonus-area-${p}`);
                 if (showBonuses) area.classList.remove('hidden');
@@ -736,10 +894,11 @@
                                         <span class="text-[8px] opacity-40">Fait: ${d.won}</span>
                                     </div>
                                     <div class="flex flex-wrap gap-1 justify-center">
-                                        ${d.bonusDetails.cards14 > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.cards14 * CONFIG.bonusC14} (C14)</span>` : ''}
-                                        ${d.bonusDetails.mermaidPirate > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.mermaidPirate * CONFIG.bonusSP} (S/P)</span>` : ''}
-                                        ${d.bonusDetails.pirateSK > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.pirateSK * CONFIG.bonusPSK} (P/SK)</span>` : ''}
-                                        ${d.bonusDetails.skMermaid > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.skMermaid * CONFIG.bonusSKS} (SK/S)</span>` : ''}
+                                        ${d.bonusDetails.cards14 > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.cards14 * CONFIG.bonusC14}</span>` : ''}
+                                        ${d.bonusDetails.mermaidPirate > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.mermaidPirate * CONFIG.bonusSP}</span>` : ''}
+                                        ${d.bonusDetails.pirateSK > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.pirateSK * CONFIG.bonusPSK}</span>` : ''}
+                                        ${d.bonusDetails.skMermaid > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.skMermaid * CONFIG.bonusSKS}</span>` : ''}
+                                        ${d.rascal > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] ${d.bid === d.won ? 'text-green-400' : 'text-pirate-red'} font-bold">RASCAL: ${d.rascal}</span>` : ''}
                                     </div>
                                     <div class="font-mono text-[11px] ${s >= 0 ? 'text-green-400' : 'text-pirate-red'} font-bold">
                                         ${s > 0 ? '+' : ''}${s}
