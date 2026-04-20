@@ -286,7 +286,7 @@
                     <div class="flex flex-col items-center gap-2">
                         <div class="flex items-center gap-1 w-full">
                             <button onclick="adjustInput('${p}', -5)" class="flex-1 h-10 sm:h-14 border-2 border-[#C8C8C0] bg-white rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-gray-50 font-mono font-black text-sm sm:text-lg text-[#666] active:scale-95 transition-all shadow-sm">-5</button>
-                            <input type="number" id="input-${p}" class="w-12 sm:w-24 h-10 sm:h-14 text-center font-mono font-black text-lg sm:text-3xl bg-white border-2 border-[#C8C8C0] rounded-lg sm:rounded-xl outline-none focus:border-accent-cyan shadow-sm" value="0">
+                            <input type="number" id="input-${p}" inputmode="numeric" pattern="[0-9]*" class="w-12 sm:w-24 h-10 sm:h-14 text-center font-mono font-black text-lg sm:text-3xl bg-white border-2 border-[#C8C8C0] rounded-lg sm:rounded-xl outline-none focus:border-accent-cyan shadow-sm" placeholder="0" value="">
                             <button onclick="adjustInput('${p}', 5)" class="flex-1 h-10 sm:h-14 border-2 border-[#C8C8C0] bg-white rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-gray-50 font-mono font-black text-sm sm:text-lg text-[#666] active:scale-95 transition-all shadow-sm">+5</button>
                         </div>
                     </div>
@@ -296,14 +296,23 @@
 
         function adjustInput(player, val) {
             const input = document.getElementById(`input-${player}`);
-            input.value = parseInt(input.value) + val;
+            
+            // On récupère la valeur actuelle, si vide on prend 0
+            let currentVal = parseInt(input.value) || 0;
+            
+            // On calcule la nouvelle valeur
+            const newVal = currentVal + val;
+            
+            // On met à jour l'input (on laisse vide si c'est 0 pour voir le placeholder)
+            input.value = newVal === 0 ? "" : newVal;
         }
 
         function validateRound() {
             players.forEach(p => {
-                const val = parseInt(document.getElementById(`input-${p}`).value) || 0;
-                scores[p].push(val);
-            });
+                    // Ajout du || 0 pour sécuriser la lecture
+                    const val = parseInt(document.getElementById(`input-${p}`).value) || 0;
+                    scores[p].push(val);
+                });
             round++;
             renderRoundInputs();
             updateScoreboard();
@@ -339,7 +348,7 @@
                                 ${t.name[0].toUpperCase()}
                             </div>
                             <span class="font-bold text-sm text-[#111] font-sans">${t.name}</span>
-                            ${isLeader ? '<span class="text-base" title="En tête !">❄️</span>' : ''}
+                            ${isLeader ? '<span class="text-base" title="En tête !">🏆</span>' : ''}
                         </div>
                         <div class="font-mono text-xl font-bold ${isDanger ? 'text-accent-pink' : 'text-accent-cyan'}">
                             ${t.total} <span class="text-[10px] opacity-60">/ ${CONFIG.scoreLimit}</span>

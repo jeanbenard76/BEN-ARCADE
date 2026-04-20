@@ -276,7 +276,7 @@
                             <label class="font-mono text-[8px] sm:text-[10px] text-[#8B7355] uppercase">Points</label>
                             <div class="flex items-center gap-1">
                                 <button onclick="adjustVal('${p}', -5)" class="flex-1 h-10 sm:h-12 bg-white border border-[#EEDDC8] rounded-xl flex items-center justify-center hover:bg-[#FFF9F0] font-mono font-black text-[10px] sm:text-sm text-[#8B7355] active:scale-95 transition-all">-5</button>
-                                <input type="number" id="base-${p}" class="w-12 sm:w-20 bg-transparent border-b-2 border-[#EEDDC8] text-center text-xl sm:text-3xl font-black outline-none focus:border-[#FF6B35] text-[#4A3B28]" value="0" onchange="updatePreview('${p}')">
+                                <input type="number" id="base-${p}" inputmode="numeric" pattern="[0-9]*" class="w-12 sm:w-20 bg-transparent border-b-2 border-[#EEDDC8] text-center text-xl sm:text-3xl font-black outline-none focus:border-[#FF6B35] text-[#4A3B28]" placeholder="0" value="" oninput="updatePreview('${p}')">
                                 <button onclick="adjustVal('${p}', 5)" class="flex-1 h-10 sm:h-12 bg-white border border-[#EEDDC8] rounded-xl flex items-center justify-center hover:bg-[#FFF9F0] font-mono font-black text-[10px] sm:text-sm text-[#8B7355] active:scale-95 transition-all">+5</button>
                             </div>
                         </div>
@@ -290,7 +290,10 @@
 
         function adjustVal(player, val) {
             const input = document.getElementById(`base-${player}`);
-            input.value = Math.max(0, parseInt(input.value) + val);
+            
+            let currentVal = parseInt(input.value) || 0;
+            const newVal = Math.max(0, currentVal + val);
+            input.value = newVal === 0 ? "" : newVal;
             updatePreview(player);
         }
 
@@ -308,6 +311,7 @@
         }
 
         function updatePreview(player) {
+            // Le "|| 0" permet de dire : si parseInt est vide ou invalide, utilise 0
             const base = parseInt(document.getElementById(`base-${player}`).value) || 0;
             const bonus = document.getElementById(`bonus-${player}`).classList.contains('bg-[#FF6B35]') ? CONFIG.bonusFlip7 : 0;
             document.getElementById(`total-preview-${player}`).innerText = `+${base + bonus}`;

@@ -367,7 +367,7 @@
                         <button type="button" onclick="adjustInput('${p}', -1)" class="w-12 h-12 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center font-display text-gray-400 hover:border-bull-red hover:text-bull-red active:scale-95 transition-all cursor-pointer text-lg">-1</button>
                         
                         <div class="relative flex-1 sm:w-24">
-                            <input type="number" id="input-${p}" class="w-full h-12 bg-white border-2 border-gray-200 rounded-xl text-center font-display text-2xl text-bull-red outline-none focus:border-bull-red focus:ring-2 focus:ring-bull-red/10 transition-all shadow-inner" value="0">
+                            <input type="number" id="input-${p}" inputmode="numeric" pattern="[0-9]*" class="w-full h-12 bg-white border-2 border-gray-200 rounded-xl text-center font-display text-2xl text-bull-red outline-none focus:border-bull-red focus:ring-2 focus:ring-bull-red/10 transition-all shadow-inner" placeholder="0" value="">
                         </div>
                         
                         <button type="button" onclick="adjustInput('${p}', 1)" class="w-12 h-12 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center font-display text-gray-400 hover:border-bull-purple hover:text-bull-purple active:scale-95 transition-all cursor-pointer text-lg">+1</button>
@@ -379,11 +379,20 @@
 
         function adjustInput(player, val) {
             const input = document.getElementById(`input-${player}`);
-            input.value = parseInt(input.value) + val;
+            
+            // On récupère la valeur actuelle, si vide on prend 0
+            let currentVal = parseInt(input.value) || 0;
+            
+            // On calcule la nouvelle valeur
+            const newVal = currentVal + val;
+            
+            // On met à jour l'input (on laisse vide si c'est 0 pour voir le placeholder)
+            input.value = newVal === 0 ? "" : newVal;
         }
 
         function validateRound() {
             players.forEach(p => {
+                // Le "|| 0" est crucial ici
                 const val = parseInt(document.getElementById(`input-${p}`).value) || 0;
                 scores[p].push(val);
             });
@@ -431,7 +440,7 @@
                                 ${index + 1}
                             </div>
                             <span class="font-bold text-sm text-bull-dark font-sans">${t.name}</span>
-                            ${isLeader ? '<span class="text-base" title="Premier !">👑</span>' : ''}
+                            ${isLeader ? '<span class="text-base" title="Premier !">🏆</span>' : ''}
                         </div>
                         <div class="font-display text-2xl ${isDanger ? 'text-bull-red' : 'text-bull-purple'}">
                             ${t.total} <span class="text-[10px] opacity-60">🐂</span>
