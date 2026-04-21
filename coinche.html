@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>COINCHE — BEN'ARCADE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        serif: ["Playfair Display", "serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    colors: {
+                        tapis: { dark: '#0B2C1C', base: '#11422A', light: '#1B5B3C' },
+                        casino: { gold: '#D4AF37', goldLight: '#F3E5AB', red: '#C62828', black: '#1A1A1A', white: '#FAFAFA' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FAFAFA; -webkit-tap-highlight-color: transparent; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pattern-bg { background-image: radial-gradient(#ffffff20 1px, transparent 1px); background-size: 16px 16px; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="text-casino-black font-sans antialiased pb-24 lg:pb-8">
+
+    <!-- SETUP SCREEN -->
+    <div id="setup-screen" class="min-h-screen bg-tapis-dark flex items-center justify-center p-4">
+        <div class="bg-casino-white rounded-2xl shadow-2xl p-8 max-w-md w-full border-t-4 border-casino-gold relative overflow-hidden">
+            <div class="text-center mb-8">
+                <div class="flex justify-center gap-2 text-3xl mb-2">
+                    <span class="text-casino-black">♠</span>
+                    <span class="text-casino-red">♥</span>
+                    <span class="text-casino-black">♣</span>
+                    <span class="text-casino-red">♦</span>
+                </div>
+                <h1 class="font-serif text-3xl font-bold text-tapis-dark">COINCHE</h1>
+                <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-mono">Règles Officielles FFB</p>
+            </div>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Équipe 1</label>
+                    <input type="text" id="team1-name" placeholder="Nous" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 font-semibold focus:border-tapis-base outline-none transition-colors text-center text-lg placeholder-gray-300">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Équipe 2</label>
+                    <input type="text" id="team2-name" placeholder="Eux" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 font-semibold focus:border-tapis-base outline-none transition-colors text-center text-lg placeholder-gray-300">
+                </div>
+            </div>
+            
+            <button onclick="startGame()" class="w-full mt-8 py-4 bg-tapis-base text-casino-gold font-serif text-xl font-bold rounded-xl shadow-lg hover:bg-tapis-light transition-all">
+                Distribuer
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="hidden">
+        
+        <!-- HEADER -->
+        <header class="bg-tapis-dark text-white sticky top-0 z-40 shadow-lg border-b-2 border-casino-gold">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between p-3 border-b border-white/10">
+                    <a href="index.html" class="p-2 hover:bg-white/10 rounded-full transition-colors text-casino-gold">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                    </a>
+                    <h1 class="font-serif text-xl text-casino-gold text-center flex-1 tracking-wider">COINCHE</h1>
+                    <div class="w-10"></div>
+                </div>
+                <div class="bg-tapis-base py-1.5 px-2 overflow-x-auto hide-scrollbar">
+                    <div id="card-values-display" class="flex gap-4 min-w-max justify-center text-[10px] sm:text-[11px] font-mono tracking-tight text-casino-goldLight"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MOBILE TABS -->
+        <div class="lg:hidden flex bg-white border-b border-gray-200 sticky top-[85px] sm:top-[88px] z-30 shadow-sm">
+            <button onclick="switchTab('input')" id="tab-input" class="flex-1 py-3 text-xs font-bold tracking-widest uppercase transition-all border-b-2 border-tapis-base text-tapis-base bg-green-50/50">Saisie</button>
+            <button onclick="switchTab('stats')" id="tab-stats" class="flex-1 py-3 text-xs font-bold tracking-widest uppercase transition-all border-b-2 border-transparent text-gray-400">Scores & Graph</button>
+        </div>
+
+        <main class="max-w-7xl mx-auto p-4 lg:py-8 lg:px-6">
+            
+            <!-- Scoreboard Global -->
+            <div class="bg-tapis-dark pattern-bg rounded-2xl shadow-xl border border-tapis-light p-4 flex justify-between items-center mb-6 text-white relative overflow-hidden">
+                <div class="text-center flex-1 z-10 overflow-hidden px-2">
+                    <h3 id="score-name-1" class="font-bold text-casino-gold uppercase tracking-wider text-xs lg:text-sm mb-1 truncate">Nous</h3>
+                    <div id="score-total-1" class="font-mono text-4xl lg:text-5xl font-bold">0</div>
+                </div>
+                <div class="text-center px-4 z-10 flex flex-col items-center justify-center shrink-0">
+                    <div class="w-[1px] h-8 bg-casino-gold/30 mb-2"></div>
+                    <div id="round-counter" class="font-mono text-[10px] bg-casino-gold text-tapis-dark px-2 py-0.5 rounded font-bold uppercase tracking-widest">Manche 1</div>
+                    <div class="w-[1px] h-8 bg-casino-gold/30 mt-2"></div>
+                </div>
+                <div class="text-center flex-1 z-10 overflow-hidden px-2">
+                    <h3 id="score-name-2" class="font-bold text-casino-gold uppercase tracking-wider text-xs lg:text-sm mb-1 truncate">Eux</h3>
+                    <div id="score-total-2" class="font-mono text-4xl lg:text-5xl font-bold">0</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- COLONNE GAUCHE : SAISIE -->
+                <section id="section-input" class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+                        <div class="bg-gray-50 border-b border-gray-200 p-3 font-serif text-sm font-bold text-gray-600 uppercase tracking-widest text-center">
+                            Contrat
+                        </div>
+                        <div class="p-4 sm:p-5 space-y-5">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">1. Preneur</label>
+                                <div class="flex bg-gray-100 p-1 rounded-xl">
+                                    <button id="btn-preneur-1" onclick="setPreneur(1)" class="flex-1 py-2.5 rounded-lg font-bold text-sm bg-white shadow text-tapis-base truncate px-2"></button>
+                                    <button id="btn-preneur-2" onclick="setPreneur(2)" class="flex-1 py-2.5 rounded-lg font-bold text-sm text-gray-400 truncate px-2"></button>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">2. Enchère</label>
+                                    <div class="relative">
+                                        <select id="enchere" onchange="updatePreview()" class="w-full bg-white border-2 border-gray-200 rounded-xl px-3 py-3 font-bold appearance-none outline-none focus:border-tapis-base">
+                                            <option value="80">80</option> <option value="90">90</option> <option value="100">100</option>
+                                            <option value="110">110</option> <option value="120">120</option> <option value="130">130</option>
+                                            <option value="140">140</option> <option value="150">150</option> <option value="160">160</option>
+                                            <option value="250">Capot (250)</option> <option value="500">Générale (500)</option>
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">▼</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">3. Atout</label>
+                                    <div class="relative">
+                                        <select id="atout" onchange="updateAtoutBase()" class="w-full bg-white border-2 border-gray-200 rounded-xl px-3 py-3 font-bold appearance-none outline-none focus:border-tapis-base">
+                                            <option value="pique">♠ Pique</option> <option value="coeur" class="text-casino-red">♥ Cœur</option>
+                                            <option value="carreau" class="text-casino-red">♦ Carreau</option> <option value="trefle">♣ Trèfle</option>
+                                            <option value="sa" class="bg-gray-100">Sans Atout</option> <option value="ta" class="bg-gray-100">Tout Atout</option>
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">▼</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">4. Multiplicateur</label>
+                                <div class="flex bg-gray-100 p-1 rounded-xl">
+                                    <button id="btn-mult-1" onclick="setMult(1)" class="flex-1 py-2.5 rounded-lg font-bold text-xs bg-tapis-base text-white shadow transition-all">Normal</button>
+                                    <button id="btn-mult-2" onclick="setMult(2)" class="flex-1 py-2.5 rounded-lg font-bold text-xs text-gray-500 hover:bg-gray-200 transition-all">Coinché</button>
+                                    <button id="btn-mult-4" onclick="setMult(4)" class="flex-1 py-2.5 rounded-lg font-bold text-xs text-gray-500 hover:bg-gray-200 transition-all">Surcoinché</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+                        <div class="p-4 sm:p-5 space-y-6">
+                            
+                            <!-- Points Faits -->
+                            <div class="w-full">
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Points réalisés (Preneur)</label>
+                                    <span class="text-[10px] font-mono text-white bg-tapis-base px-2 py-0.5 rounded shadow">Base fixe: 162</span>
+                                </div>
+                                <div class="flex items-center gap-2 w-full">
+                                    <button onclick="adjustPoints(-10)" class="w-14 shrink-0 h-14 bg-gray-100 text-gray-600 rounded-xl font-mono text-2xl hover:bg-gray-200 active:bg-gray-300 transition-colors">-</button>
+                                    <input type="number" id="points-faits" placeholder="0" inputmode="numeric" pattern="[0-9]*" oninput="updatePreview()" class="flex-1 min-w-0 h-14 text-center font-mono text-4xl font-bold bg-white border-2 border-gray-200 rounded-xl outline-none focus:border-tapis-base text-tapis-dark placeholder-gray-200">
+                                    <button onclick="adjustPoints(10)" class="w-14 shrink-0 h-14 bg-gray-100 text-gray-600 rounded-xl font-mono text-2xl hover:bg-gray-200 active:bg-gray-300 transition-colors">+</button>
+                                </div>
+                                <div class="flex gap-2 text-xs mt-3">
+                                    <button onclick="setPoints(0)" class="flex-1 py-2 bg-red-50 text-red-600 rounded-lg font-bold hover:bg-red-100 active:scale-95 transition-all">Chuté (0)</button>
+                                    <button onclick="setPoints(162)" class="flex-1 py-2 bg-green-50 text-green-600 rounded-lg font-bold hover:bg-green-100 active:scale-95 transition-all">Tout pris (162)</button>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-100">
+
+                            <!-- Belote & Annonces -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Belote (+20)</label>
+                                        <button id="btn-add-belote" onclick="openBeloteModal()" class="flex items-center gap-1 text-[10px] font-bold text-casino-gold bg-yellow-50 px-2 py-1 rounded-md hover:bg-yellow-100 transition-colors border border-yellow-200">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+                                            Ajouter
+                                        </button>
+                                    </div>
+                                    <div id="belotes-container" class="space-y-2">
+                                        <div class="text-center py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-xs text-gray-400 font-mono">Aucune belote</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Annonces</label>
+                                        <button onclick="openAnnonceModal()" class="flex items-center gap-1 text-[10px] font-bold text-tapis-base bg-green-50 px-2 py-1 rounded-md hover:bg-green-100 transition-colors border border-green-200">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+                                            Ajouter
+                                        </button>
+                                    </div>
+                                    <div id="annonces-container" class="space-y-2">
+                                        <div class="text-center py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-xs text-gray-400 font-mono">Aucune annonce</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Result Preview -->
+                            <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 flex justify-between items-center mt-2">
+                                <div class="flex gap-4 font-mono text-sm font-bold flex-1 justify-center px-2 truncate">
+                                    <span id="preview-t1" class="text-gray-400 truncate"></span>
+                                    <span id="preview-t2" class="text-gray-400 truncate"></span>
+                                </div>
+                                <span id="preview-status" class="text-[10px] font-bold px-2 py-1 rounded bg-gray-200 text-gray-600 shrink-0 tracking-wider">EN ATTENTE</span>
+                            </div>
+                        </div>
+                        
+                        <button onclick="calculateAndSave()" class="w-full py-5 bg-casino-black text-casino-gold font-serif text-xl font-bold hover:bg-gray-900 transition-all flex justify-center gap-2 items-center shadow-lg">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>
+                            VALIDER LA MANCHE
+                        </button>
+                    </div>
+                </section>
+
+                <!-- COLONNE DROITE : STATS & HISTORIQUE -->
+                <section id="section-stats" class="hidden lg:flex flex-col gap-6">
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4">
+                        <div class="font-serif text-sm font-bold text-gray-600 uppercase tracking-widest mb-4">Évolution</div>
+                        <div class="h-48 w-full"><canvas id="scoreChart"></canvas></div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 flex-1 overflow-hidden flex flex-col">
+                        <div class="bg-gray-50 border-b border-gray-200 p-3 font-serif text-sm font-bold text-gray-600 uppercase tracking-widest flex justify-between items-center">
+                            <span>Historique</span>
+                            <button onclick="undo()" class="text-[10px] bg-white border border-gray-300 px-2 py-1 rounded text-red-600 hover:bg-red-50 transition-colors">⏪ Annuler</button>
+                        </div>
+                        <div class="overflow-y-auto flex-1 p-0 hide-scrollbar" style="max-height: 400px;">
+                            <table class="w-full text-sm text-center">
+                                <thead class="bg-white sticky top-0 border-b border-gray-200 text-[10px] text-gray-400 uppercase tracking-wider font-bold z-10 shadow-sm">
+                                    <tr>
+                                        <th class="py-3 px-2 font-normal">Contrat</th>
+                                        <th class="py-3 px-2" id="hist-name-1">E1</th>
+                                        <th class="py-3 px-2" id="hist-name-2">E2</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-body" class="divide-y divide-gray-100 font-mono">
+                                    <tr><td colspan="3" class="py-8 text-gray-400 italic text-xs font-sans">La partie commence...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL BELOTE -->
+    <div id="modal-belote" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl transform transition-transform border-2 border-casino-gold">
+            <div class="bg-gray-50 border-b border-gray-200 p-4 flex justify-between items-center">
+                <h3 class="font-serif text-sm font-bold text-gray-600 uppercase tracking-widest">Qui a la Belote ?</h3>
+                <button onclick="closeBeloteModal()" class="text-gray-400 hover:text-casino-red font-bold text-xl">&times;</button>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <button id="mb-btn-1" onclick="addBeloteDirect(1)" class="py-4 rounded-xl font-bold text-lg bg-yellow-50 text-casino-gold border-2 border-casino-gold hover:bg-yellow-100 transition-colors shadow-sm truncate px-1"></button>
+                    <button id="mb-btn-2" onclick="addBeloteDirect(2)" class="py-4 rounded-xl font-bold text-lg bg-gray-50 text-gray-600 border-2 border-gray-200 hover:bg-gray-100 transition-colors shadow-sm truncate px-1"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ANNONCES -->
+    <div id="modal-annonce" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl transform transition-transform border-2 border-tapis-base">
+            <div class="bg-gray-50 border-b border-gray-200 p-4 flex justify-between items-center">
+                <h3 class="font-serif text-sm font-bold text-gray-600 uppercase tracking-widest">Ajouter une annonce</h3>
+                <button onclick="closeAnnonceModal()" class="text-gray-400 hover:text-casino-red font-bold text-xl">&times;</button>
+            </div>
+            <div class="p-5 space-y-5">
+                <div>
+                    <div class="flex bg-gray-100 p-1 rounded-xl">
+                        <button id="ma-team-1" onclick="setMATeam(1)" class="flex-1 py-2 rounded-lg font-bold text-xs bg-white shadow text-tapis-base truncate px-1"></button>
+                        <button id="ma-team-2" onclick="setMATeam(2)" class="flex-1 py-2 rounded-lg font-bold text-xs text-gray-400 truncate px-1"></button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">1. Type</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setMAType('tierce')" id="ma-type-tierce" class="py-2 border-2 border-tapis-base bg-green-50 text-tapis-base rounded-lg font-bold text-xs">Tierce</button>
+                        <button onclick="setMAType('cinquante')" id="ma-type-cinquante" class="py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs hover:bg-gray-50">Cinquante</button>
+                        <button onclick="setMAType('cent')" id="ma-type-cent" class="py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs hover:bg-gray-50">Cent</button>
+                        <button onclick="setMAType('carre')" id="ma-type-carre" class="py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs hover:bg-gray-50">Carré</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">2. Hauteur de la carte max</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setMARank('A')" id="ma-rank-A" class="py-2 border-2 border-tapis-base bg-green-50 text-tapis-base rounded-lg font-bold text-xs">As</button>
+                        <button onclick="setMARank('R')" id="ma-rank-R" class="py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs">Roi</button>
+                        <button onclick="setMARank('D')" id="ma-rank-D" class="py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs">Dame</button>
+                        <button onclick="setMARank('V')" id="ma-rank-V" class="py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs">Valet</button>
+                        <button onclick="setMARank('10')" id="ma-rank-10" class="py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs">10</button>
+                        <button onclick="setMARank('9')" id="ma-rank-9" class="py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs">9</button>
+                        <button onclick="setMARank('8')" id="ma-rank-8" class="py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs">8</button>
+                        <button onclick="setMARank('7')" id="ma-rank-7" class="py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs">7</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">3. Est-ce à l'Atout ?</label>
+                    <button onclick="toggleMAAtout()" id="ma-atout-btn" class="w-full py-2.5 border-2 border-gray-200 text-gray-500 rounded-lg font-bold text-sm transition-colors">Non (Couleur classique)</button>
+                </div>
+                <button onclick="confirmAnnonce()" class="w-full py-3.5 bg-tapis-base text-casino-gold rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-tapis-dark shadow-md mt-2">Valider l'annonce</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VICTOIRE -->
+    <div id="modal-victory" class="hidden fixed inset-0 z-[100] bg-tapis-dark/95 backdrop-blur flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl border-4 border-casino-gold">
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="font-serif text-3xl font-bold text-tapis-dark mb-2 uppercase tracking-widest">Victoire !</h2>
+            <p class="text-gray-500 font-bold mb-6 text-sm uppercase tracking-wider">Partie terminée (1000 pts atteints)</p>
+            <div class="bg-gray-50 rounded-xl p-6 mb-8 border border-gray-200">
+                <div class="text-xl font-bold text-casino-gold mb-1" id="victory-winner-name">Equipe X</div>
+                <div class="font-mono text-5xl font-black text-tapis-base" id="victory-winner-score">1020</div>
+            </div>
+            <button onclick="restartGame()" class="w-full py-4 bg-tapis-base text-casino-gold font-serif text-lg font-bold rounded-xl shadow-lg hover:bg-tapis-light transition-all uppercase tracking-widest">
+                Nouvelle Partie
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- ETAT GLOBAL ---
+        let teams = { 1: "Nous", 2: "Eux" };
+        let scores = { 1: 0, 2: 0 };
+        let history = [];
+        let annoncesList = []; 
+        let belotesList = []; 
+        let preneur = 1, multiplicateur = 1, currentBase = 162; 
+        let chart;
+
+        const A_RANKS = ['A', 'R', 'D', 'V', '10', '9', '8', '7'];
+        let mATeam = 1, mAType = 'tierce', mARank = 'A', mAAtout = false;
+
+        // --- INIT ---
+        function startGame() {
+            teams[1] = document.getElementById('team1-name').value.trim() || "Nous";
+            teams[2] = document.getElementById('team2-name').value.trim() || "Eux";
+            
+            ['score-name-1', 'btn-preneur-1', 'ma-team-1', 'mb-btn-1'].forEach(id => document.getElementById(id).innerText = teams[1]);
+            ['score-name-2', 'btn-preneur-2', 'ma-team-2', 'mb-btn-2'].forEach(id => document.getElementById(id).innerText = teams[2]);
+            document.getElementById('hist-name-1').innerText = teams[1].substring(0,4).toUpperCase();
+            document.getElementById('hist-name-2').innerText = teams[2].substring(0,4).toUpperCase();
+            
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            initChart();
+            updateAtoutBase();
+        }
+
+        function restartGame() {
+            scores = { 1: 0, 2: 0 };
+            history = [];
+            document.getElementById('modal-victory').classList.add('hidden');
+            resetForm();
+            updateUI();
+            chart.data.labels = ['Début']; chart.data.datasets[0].data = [0]; chart.data.datasets[1].data = [0]; chart.update();
+        }
+
+        function switchTab(tab) {
+            const inputSec = document.getElementById('section-input');
+            const statsSec = document.getElementById('section-stats');
+            const tInput = document.getElementById('tab-input');
+            const tStats = document.getElementById('tab-stats');
+
+            if (tab === 'input') {
+                inputSec.classList.remove('hidden'); statsSec.classList.add('hidden', 'lg:flex');
+                tInput.className = "flex-1 py-3 text-xs font-bold tracking-widest uppercase border-b-2 border-tapis-base text-tapis-base bg-green-50/50";
+                tStats.className = "flex-1 py-3 text-xs font-bold tracking-widest uppercase border-b-2 border-transparent text-gray-400";
+            } else {
+                inputSec.classList.add('hidden'); statsSec.classList.remove('hidden'); statsSec.classList.add('flex');
+                tStats.className = "flex-1 py-3 text-xs font-bold tracking-widest uppercase border-b-2 border-tapis-base text-tapis-base bg-green-50/50";
+                tInput.className = "flex-1 py-3 text-xs font-bold tracking-widest uppercase border-b-2 border-transparent text-gray-400";
+                if(chart) chart.update();
+            }
+        }
+
+        // --- FORMULAIRE PRINCIPAL ---
+        function setPreneur(id) {
+            preneur = id;
+            document.getElementById('btn-preneur-1').className = id === 1 ? "flex-1 py-2.5 rounded-lg font-bold text-sm bg-white shadow text-tapis-base truncate px-2" : "flex-1 py-2.5 rounded-lg font-bold text-sm text-gray-400 truncate px-2";
+            document.getElementById('btn-preneur-2').className = id === 2 ? "flex-1 py-2.5 rounded-lg font-bold text-sm bg-white shadow text-tapis-base truncate px-2" : "flex-1 py-2.5 rounded-lg font-bold text-sm text-gray-400 truncate px-2";
+            updatePreview();
+        }
+
+        function setMult(val) {
+            multiplicateur = val;
+            [1, 2, 4].forEach(m => {
+                document.getElementById(`btn-mult-${m}`).className = m === val ? "flex-1 py-2.5 rounded-lg font-bold text-xs bg-tapis-base text-white shadow" : "flex-1 py-2.5 rounded-lg font-bold text-xs text-gray-500 hover:bg-gray-200";
+            });
+            updatePreview();
+        }
+
+        function updateAtoutBase() {
+            const atout = document.getElementById('atout').value;
+            const disp = document.getElementById('card-values-display');
+            
+            if(atout === 'sa') {
+                disp.innerHTML = `<span><span class="text-white">SA :</span> As:19 | 10:10 | R:4 | D:3 | V:2 | 9,8,7:0</span>`;
+            } else if (atout === 'ta') {
+                disp.innerHTML = `<span><span class="text-white">TA :</span> V:13 | 9:9 | As:6 | 10:5 | R:3 | D:2 | 8,7:0</span>`;
+            } else {
+                disp.innerHTML = `<span><span class="text-white">ATOUT:</span> V:20 | 9:14 | As:11 | 10:10 | R:4 | D:3</span> <span class="mx-2 opacity-30">|</span> <span><span class="text-white">NORM:</span> As:11 | 10:10 | R:4 | D:3 | V:2</span>`;
+            }
+            
+            document.getElementById('points-faits').value = ""; 
+            renderBelotes();
+            updatePreview();
+        }
+
+        function adjustPoints(val) {
+            let input = document.getElementById('points-faits');
+            let n = (parseInt(input.value) || 0) + val;
+            input.value = Math.max(0, Math.min(n, 162));
+            updatePreview();
+        }
+
+        function setPoints(val) { document.getElementById('points-faits').value = val; updatePreview(); }
+
+        // --- BELOTE RAPIDE ---
+        function openBeloteModal() {
+            document.getElementById('modal-belote').classList.remove('hidden');
+        }
+        function closeBeloteModal() { document.getElementById('modal-belote').classList.add('hidden'); }
+
+        function addBeloteDirect(teamId) {
+            belotesList.push({ team: teamId, val: 20 });
+            renderBelotes(); updatePreview(); closeBeloteModal();
+        }
+
+        function renderBelotes() {
+            const c = document.getElementById('belotes-container');
+            const btn = document.getElementById('btn-add-belote');
+            
+            // Toujours visible pour laisser libre choix à l'utilisateur
+            btn.classList.remove('hidden');
+
+            if(belotesList.length === 0) {
+                c.innerHTML = `<div class="text-center py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-xs text-gray-400 font-mono">Aucune belote</div>`; 
+                return;
+            }
+            
+            c.innerHTML = belotesList.map((b, i) => `
+                <div class="flex items-center justify-between bg-white border border-casino-gold rounded-lg p-2 shadow-sm">
+                    <div class="flex items-center gap-2 truncate">
+                        <span class="bg-yellow-50 text-casino-gold font-bold text-[10px] px-2 py-1 rounded max-w-[60px] truncate block text-center">${teams[b.team].toUpperCase()}</span>
+                        <span class="font-bold text-xs sm:text-sm text-tapis-dark truncate">Belote <span class="text-gray-400 font-normal">(20)</span></span>
+                    </div>
+                    <button onclick="belotesList.splice(${i}, 1); renderBelotes(); updatePreview();" class="p-1.5 text-red-500 hover:bg-red-50 rounded-md shrink-0">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // --- ANNONCES DETAILLEES ---
+        function openAnnonceModal() {
+            document.getElementById('modal-annonce').classList.remove('hidden');
+            setMATeam(preneur); setMAType('tierce'); setMARank('A');
+            mAAtout = false; updateMAAtoutBtn();
+        }
+        function closeAnnonceModal() { document.getElementById('modal-annonce').classList.add('hidden'); }
+
+        function setMATeam(id) {
+            mATeam = id;
+            document.getElementById('ma-team-1').className = id === 1 ? "flex-1 py-2 rounded-lg font-bold text-xs bg-white shadow text-tapis-base truncate px-1" : "flex-1 py-2 rounded-lg font-bold text-xs text-gray-400 truncate px-1";
+            document.getElementById('ma-team-2').className = id === 2 ? "flex-1 py-2 rounded-lg font-bold text-xs bg-white shadow text-tapis-base truncate px-1" : "flex-1 py-2 rounded-lg font-bold text-xs text-gray-400 truncate px-1";
+        }
+
+        function setMAType(type) {
+            mAType = type;
+            ['tierce', 'cinquante', 'cent', 'carre'].forEach(k => {
+                document.getElementById(`ma-type-${k}`).className = k === type ? "py-2 border-2 border-tapis-base bg-green-50 text-tapis-base rounded-lg font-bold text-xs" : "py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs hover:bg-gray-50";
+            });
+            const isCarre = (type === 'carre');
+            document.getElementById('ma-rank-8').disabled = isCarre; document.getElementById('ma-rank-7').disabled = isCarre;
+            document.getElementById('ma-rank-8').style.opacity = isCarre ? "0.3" : "1"; document.getElementById('ma-rank-7').style.opacity = isCarre ? "0.3" : "1";
+            if(isCarre && (mARank === '8' || mARank === '7')) setMARank('A');
+            if(isCarre) { mAAtout = false; updateMAAtoutBtn(); }
+        }
+
+        function setMARank(r) {
+            mARank = r;
+            A_RANKS.forEach(k => {
+                document.getElementById(`ma-rank-${k}`).className = k === r ? "py-2 border-2 border-tapis-base bg-green-50 text-tapis-base rounded-lg font-bold text-xs" : "py-2 border-2 border-gray-100 text-gray-500 rounded-lg font-bold text-xs";
+            });
+        }
+
+        function toggleMAAtout() { 
+            const atoutGlob = document.getElementById('atout').value;
+            if(atoutGlob === 'sa' || atoutGlob === 'ta' || mAType === 'carre') return; 
+            mAAtout = !mAAtout; updateMAAtoutBtn(); 
+        }
+
+        function updateMAAtoutBtn() {
+            const btn = document.getElementById('ma-atout-btn');
+            const atoutGlob = document.getElementById('atout').value;
+            if(atoutGlob === 'sa' || atoutGlob === 'ta' || mAType === 'carre') {
+                btn.innerText = "Non applicable (Grisé)";
+                btn.className = "w-full py-2.5 border-2 border-gray-200 bg-gray-100 text-gray-400 rounded-lg font-bold text-sm cursor-not-allowed";
+                mAAtout = false;
+            } else if(mAAtout) { 
+                btn.innerText = "★ Oui (À l'Atout)"; 
+                btn.className = "w-full py-2.5 border-2 border-tapis-base bg-green-50 text-tapis-base rounded-lg font-bold text-sm"; 
+            } else { 
+                btn.innerText = "Non (Couleur classique)"; 
+                btn.className = "w-full py-2.5 border-2 border-gray-200 text-gray-500 rounded-lg font-bold text-sm"; 
+            }
+        }
+
+        function computeAnnoncePower(type, rank, isAtout, atoutGlob) {
+            let weight = { 'tierce': 1, 'cinquante': 2, 'cent': 3, 'carre': 4 }[type];
+            let val = { 'tierce': 20, 'cinquante': 50, 'cent': 100, 'carre': 100 }[type];
+            let rankW = 0;
+
+            if (type === 'carre') {
+                if (atoutGlob === 'sa') {
+                    rankW = ['9','V','D','R','10','A'].indexOf(rank) + 1;
+                    if (rank === 'A') val = 200; else if (rank === '10') val = 150;
+                } else {
+                    rankW = ['D','R','10','A','9','V'].indexOf(rank) + 1;
+                    if (rank === 'V') val = 200; else if (rank === '9') val = 150;
+                }
+            } else {
+                rankW = ['7','8','9','10','V','D','R','A'].indexOf(rank) + 1;
+            }
+
+            let power = (weight * 10000) + (rankW * 100) + (isAtout ? 1 : 0);
+            return { val, power };
+        }
+
+        function confirmAnnonce() {
+            let nName = { 'tierce': 'Tierce', 'cinquante': 'Cinquante', 'cent': 'Cent', 'carre': 'Carré' }[mAType];
+            let full = `${nName} de ${mARank} ${mAAtout ? "(★)" : ""}`;
+            annoncesList.push({ team: mATeam, type: mAType, rank: mARank, atout: mAAtout, name: full });
+            renderAnnonces(); updatePreview(); closeAnnonceModal();
+        }
+
+        function renderAnnonces() {
+            const c = document.getElementById('annonces-container');
+            if(annoncesList.length === 0) {
+                c.innerHTML = `<div class="text-center py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-xs text-gray-400 font-mono">Aucune annonce</div>`; return;
+            }
+            const atoutGlob = document.getElementById('atout').value;
+            c.innerHTML = annoncesList.map((a, i) => {
+                let { val } = computeAnnoncePower(a.type, a.rank, a.atout, atoutGlob);
+                return `
+                <div class="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-2 shadow-sm">
+                    <div class="flex items-center gap-2 truncate">
+                        <span class="bg-gray-100 text-gray-600 font-bold text-[10px] px-2 py-1 rounded max-w-[60px] truncate block text-center shrink-0">${teams[a.team].toUpperCase()}</span>
+                        <span class="font-bold text-xs sm:text-sm text-tapis-dark truncate">${a.name} <span class="text-gray-400 font-normal">(${val})</span></span>
+                    </div>
+                    <button onclick="annoncesList.splice(${i}, 1); renderAnnonces(); updatePreview();" class="p-1.5 text-red-500 hover:bg-red-50 rounded-md shrink-0">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            `;}).join('');
+        }
+
+        // --- MOTEUR DE SCORE CORRIGÉ (LE PRENEUR GAGNE S'IL ATTEINT SON CONTRAT) ---
+        function computeRound() {
+            const enchere = parseInt(document.getElementById('enchere').value);
+            const atout = document.getElementById('atout').value;
+            const ptsRaw = parseInt(document.getElementById('points-faits').value) || 0;
+            
+            // Belotes Totals (Imprenable : Toujours gardé, jamais multiplié, jamais volé)
+            let b1 = 0, b2 = 0;
+            belotesList.forEach(b => { if(b.team === 1) b1 += b.val; else b2 += b.val; });
+            const bPreneur = preneur === 1 ? b1 : b2;
+            const bDefense = preneur === 1 ? b2 : b1;
+
+            // Arrondi officiel Belote (au plus proche)
+            let pP = Math.round(ptsRaw / 10) * 10;
+            let pD = Math.round((162 - ptsRaw) / 10) * 10;
+            let capotPreneur = false, capotDefense = false;
+            
+            if (ptsRaw === 162) { pP = 250; pD = 0; capotPreneur = true; }
+            if (ptsRaw === 0) { pP = 0; pD = 250; capotDefense = true; }
+
+            // Bataille d'annonces
+            let maxP1 = -1, maxP2 = -1, sum1 = 0, sum2 = 0;
+            let list1 = [], list2 = [];
+            annoncesList.forEach(a => {
+                let res = computeAnnoncePower(a.type, a.rank, a.atout, atout);
+                if (a.team === 1) {
+                    if (res.power > maxP1) maxP1 = res.power;
+                    sum1 += res.val; list1.push(a);
+                } else {
+                    if (res.power > maxP2) maxP2 = res.power;
+                    sum2 += res.val; list2.push(a);
+                }
+            });
+
+            // Celui qui a l'annonce la plus forte rafle toutes SES annonces, l'autre a zéro.
+            let a1 = 0, a2 = 0, winList = [];
+            if (maxP1 > maxP2) { a1 = sum1; winList = list1; }
+            else if (maxP2 > maxP1) { a2 = sum2; winList = list2; }
+
+            let aPreneur = preneur === 1 ? a1 : a2;
+            let aDefense = preneur === 1 ? a2 : a1;
+
+            // Réussite Contrat
+            // LE PRENEUR GAGNE S'IL ATTEINT L'ENCHÈRE AVEC SES POINTS + SES ANNONCES + SA BELOTE
+            let reussi = false;
+            if (enchere >= 250) reussi = capotPreneur;
+            else {
+                let tP = pP + aPreneur + bPreneur; 
+                reussi = (tP >= enchere);
+            }
+
+            // Calcul Final des Points
+            let sP = 0, sD = 0;
+            let baseC = capotPreneur || capotDefense ? 250 : 160;
+
+            if (reussi) {
+                if (multiplicateur === 1) {
+                    sP = pP + enchere + aPreneur + bPreneur;
+                    sD = pD + aDefense + bDefense;
+                } else { 
+                    // Coinché et Réussi = le preneur vole les annonces adverses !
+                    let stolenAnnonces = aPreneur + aDefense;
+                    sP = (baseC + enchere + stolenAnnonces) * multiplicateur + bPreneur;
+                    sD = bDefense;
+                }
+            } else { 
+                // Chuté ou Coinché Chuté = la défense vole les annonces du preneur !
+                let stolenAnnonces = aPreneur + aDefense;
+                sP = bPreneur;
+                sD = (baseC + enchere + stolenAnnonces) * multiplicateur + bDefense;
+            }
+
+            return {
+                pts1: preneur === 1 ? sP : sD, pts2: preneur === 2 ? sP : sD,
+                reussi, enchere, atout, mult: multiplicateur, preneur,
+                belotes: belotesList.slice(), winningAnnonces: winList
+            };
+        }
+
+        function updatePreview() {
+            const res = computeRound();
+            const p1 = document.getElementById('preview-t1');
+            const p2 = document.getElementById('preview-t2');
+            const st = document.getElementById('preview-status');
+
+            p1.innerText = `${teams[1]}: +${res.pts1}`;
+            p1.className = `truncate ${res.pts1 > res.pts2 ? "text-green-600" : "text-gray-400"}`;
+            
+            p2.innerText = `${teams[2]}: +${res.pts2}`;
+            p2.className = `truncate ${res.pts2 > res.pts1 ? "text-green-600" : "text-gray-400"}`;
+
+            if(res.reussi) { st.innerText = "PASSE"; st.className = "text-[10px] font-bold px-2 py-1 rounded bg-green-100 text-green-700 tracking-wider shrink-0"; } 
+            else { st.innerText = "CHUTE"; st.className = "text-[10px] font-bold px-2 py-1 rounded bg-red-100 text-red-700 tracking-wider shrink-0"; }
+        }
+
+        function calculateAndSave() {
+            const res = computeRound();
+            history.push(res);
+            scores[1] += res.pts1; scores[2] += res.pts2;
+            
+            updateUI(); resetForm();
+
+            if(scores[1] >= 1000 || scores[2] >= 1000) {
+                const w = scores[1] > scores[2] ? 1 : 2;
+                document.getElementById('victory-winner-name').innerText = teams[w];
+                document.getElementById('victory-winner-score').innerText = scores[w] + " pts";
+                document.getElementById('modal-victory').classList.remove('hidden');
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('score-total-1').innerText = scores[1];
+            document.getElementById('score-total-2').innerText = scores[2];
+            document.getElementById('round-counter').innerText = `Manche ${history.length + 1}`;
+
+            const tbody = document.getElementById('history-body');
+            const sym = { pique:'♠', coeur:'<span class="text-casino-red">♥</span>', carreau:'<span class="text-casino-red">♦</span>', trefle:'♣', sa:'SA', ta:'TA' };
+            const mStr = { 1:'', 2:'<span class="text-[9px] bg-gray-200 text-gray-700 px-1 rounded ml-1">x2</span>', 4:'<span class="text-[9px] bg-red-100 text-red-600 px-1 rounded ml-1">x4</span>' };
+
+            tbody.innerHTML = history.slice().reverse().map((r) => {
+                const c1 = r.preneur === 1 ? "bg-gray-50 font-bold" : "";
+                const c2 = r.preneur === 2 ? "bg-gray-50 font-bold" : "";
+                
+                let bH = '';
+                let tags = [];
+                let bCount1 = r.belotes.filter(b=>b.team===1).length;
+                let bCount2 = r.belotes.filter(b=>b.team===2).length;
+                if(bCount1 > 0) tags.push(`Belote${bCount1>1?' x'+bCount1:''} (${teams[1]})`);
+                if(bCount2 > 0) tags.push(`Belote${bCount2>1?' x'+bCount2:''} (${teams[2]})`);
+                r.winningAnnonces.forEach(a => tags.push(`${a.name} (${teams[a.team]})`));
+                if(tags.length > 0) bH = `<div class="text-[9px] text-gray-400 mt-1 leading-tight font-sans truncate">${tags.join(' • ')}</div>`;
+
+                return `
+                <tr class="border-b border-gray-100 last:border-0">
+                    <td class="py-3 px-2 border-r border-gray-100 text-left pl-3 max-w-[150px] truncate">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-bold text-sm ${r.reussi ? 'text-tapis-dark' : 'text-red-500 line-through decoration-2'}">${r.enchere}</span>
+                            <span class="text-base">${sym[r.atout]}</span>
+                            ${mStr[r.mult]}
+                        </div>${bH}
+                    </td>
+                    <td class="py-3 px-2 ${c1} text-tapis-base">+${r.pts1}</td>
+                    <td class="py-3 px-2 ${c2} text-tapis-base">+${r.pts2}</td>
+                </tr>`;
+            }).join('');
+
+            updateChart();
+        }
+
+        function resetForm() {
+            setPreneur(preneur === 1 ? 2 : 1);
+            setMult(1); 
+            document.getElementById('enchere').value = "80";
+            document.getElementById('atout').value = "pique";
+            document.getElementById('points-faits').value = ""; 
+            annoncesList = []; belotesList = [];
+            renderAnnonces(); renderBelotes(); updateAtoutBase();
+        }
+
+        function undo() {
+            if(history.length === 0) return;
+            if(confirm("Annuler la dernière manche ?")) {
+                const last = history.pop();
+                scores[1] -= last.pts1; scores[2] -= last.pts2;
+                updateUI();
+                chart.data.labels.pop(); chart.data.datasets[0].data.pop(); chart.data.datasets[1].data.pop();
+                chart.update();
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: ['Début'], datasets: [
+                    { label: teams[1], data: [0], borderColor: '#11422A', backgroundColor: '#11422A', borderWidth: 2, tension: 0.1 },
+                    { label: teams[2], data: [0], borderColor: '#D4AF37', backgroundColor: '#D4AF37', borderWidth: 2, tension: 0.1 }
+                ]},
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter' } } } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
+                }
+            });
+        }
+
+        function updateChart() {
+            chart.data.labels.push(`M${history.length}`);
+            let t1 = 0, t2 = 0; const d1 = [0], d2 = [0];
+            history.forEach(h => { t1 += h.pts1; t2 += h.pts2; d1.push(t1); d2.push(t2); });
+            chart.data.datasets[0].data = d1; chart.data.datasets[0].label = teams[1];
+            chart.data.datasets[1].data = d2; chart.data.datasets[1].label = teams[2];
+            chart.update();
+        }
+    </script>
+</body>
+</html>
