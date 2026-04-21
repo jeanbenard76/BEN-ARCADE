@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODENAMES — BEN'ARCADE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Black+Ops+One&family=Special+Elite&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ["Share Tech Mono", "monospace"],
+                        display: ["Black Ops One", "cursive"],
+                        typewriter: ["Special Elite", "cursive"],
+                    },
+                    colors: {
+                        spy: {
+                            bg: '#0a0a0a',
+                            red: '#FF1744',
+                            blue: '#00E5FF',
+                            paper: '#EAE1D0',
+                            folder: '#D4B872'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .crt-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+        .scanline {
+            width: 100%; height: 10px; background: rgba(255,255,255,0.1);
+            position: absolute; animation: scanline 6s linear infinite; pointer-events: none;
+        }
+        @keyframes scanline {
+            0% { top: -10%; } 100% { top: 110%; }
+        }
+        /* Masquer la scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-spy-bg text-gray-300 font-mono relative min-h-screen overflow-x-hidden selection:bg-spy-red selection:text-white pb-24">
+    <div class="crt-overlay absolute inset-0 z-50 fixed"></div>
+    <div class="scanline z-40 fixed"></div>
+
+    <!-- Header -->
+    <header class="p-4 sm:p-6 border-b border-gray-800 flex items-center justify-between bg-black/80 sticky top-0 z-40 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="p-2 hover:bg-white/10 rounded transition-colors text-gray-500 hover:text-white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            </a>
+            <div>
+                <h1 class="font-display text-xl sm:text-2xl tracking-widest text-white uppercase">CODENAMES</h1>
+                <p class="text-[9px] sm:text-[10px] tracking-[4px] text-spy-red uppercase animate-pulse">Dossier Classifié</p>
+            </div>
+        </div>
+        <button onclick="resetGame()" class="px-2 py-1.5 sm:px-3 border border-gray-700 text-[9px] sm:text-[10px] uppercase tracking-widest hover:bg-gray-800 hover:text-white transition-colors">
+            Avorter
+        </button>
+    </header>
+
+    <main class="max-w-3xl mx-auto p-4 sm:p-6 relative z-10">
+        
+        <!-- Setup Equipes (Dossier Papier) -->
+        <div id="setup-section" class="bg-spy-paper p-1 rounded shadow-2xl transform rotate-1 max-w-sm sm:max-w-md mx-auto mt-6 sm:mt-10 text-black">
+            <div class="border-2 border-black p-5 sm:p-8 border-dashed relative">
+                <div class="absolute -top-4 -right-4 text-spy-red font-display text-2xl sm:text-3xl transform rotate-12 border-4 border-spy-red p-1 sm:p-2 rounded opacity-80 backdrop-blur-sm">
+                    TOP SECRET
+                </div>
+                
+                <h2 class="font-typewriter text-lg sm:text-xl font-bold mb-8 underline decoration-wavy text-black">ASSIGNATION DES AGENTS</h2>
+                
+                <div class="space-y-6 font-typewriter">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-bold text-spy-red mb-1">// ÉQUIPE ROUGE</label>
+                        <input type="text" id="red-team-name" placeholder="Ex: URSS..." class="w-full bg-transparent border-b-2 border-black/50 outline-none focus:border-spy-red py-1 text-base sm:text-lg placeholder-black/30">
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-bold text-spy-blue mb-1 mt-4">// ÉQUIPE BLEUE</label>
+                        <input type="text" id="blue-team-name" placeholder="Ex: CIA..." class="w-full bg-transparent border-b-2 border-black/50 outline-none focus:border-spy-blue py-1 text-base sm:text-lg placeholder-black/30">
+                    </div>
+                </div>
+                
+                <button onclick="startGame()" class="w-full mt-10 bg-black text-spy-paper font-mono uppercase tracking-[5px] py-4 hover:bg-gray-800 transition-colors shadow-lg active:translate-y-1">
+                    Initialiser la mission
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-section" class="hidden">
+            
+            <!-- Scoreboard (Cote à cote mobile) -->
+            <div class="grid grid-cols-2 gap-3 sm:gap-6 mb-8">
+                <!-- Red Team -->
+                <div class="bg-[#1a0f12] border border-spy-red/40 p-4 sm:p-6 rounded shadow-[0_0_15px_rgba(255,23,68,0.15)] flex flex-col items-center justify-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-spy-red/50"></div>
+                    <h3 id="display-red-name" class="font-display text-lg sm:text-2xl text-spy-red mb-1 sm:mb-2 uppercase tracking-wider truncate w-full text-center">ROUGES</h3>
+                    <div class="font-mono text-5xl sm:text-7xl font-bold text-white mb-1" id="score-red">0</div>
+                    <div class="text-[8px] sm:text-[10px] text-gray-500 uppercase tracking-widest text-center">Victoires Confirmées</div>
+                </div>
+                
+                <!-- Blue Team -->
+                <div class="bg-[#0f181a] border border-spy-blue/40 p-4 sm:p-6 rounded shadow-[0_0_15px_rgba(0,229,255,0.15)] flex flex-col items-center justify-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-spy-blue/50"></div>
+                    <h3 id="display-blue-name" class="font-display text-lg sm:text-2xl text-spy-blue mb-1 sm:mb-2 uppercase tracking-wider truncate w-full text-center">BLEUS</h3>
+                    <div class="font-mono text-5xl sm:text-7xl font-bold text-white mb-1" id="score-blue">0</div>
+                    <div class="text-[8px] sm:text-[10px] text-gray-500 uppercase tracking-widest text-center">Victoires Confirmées</div>
+                </div>
+            </div>
+
+            <!-- Action Area (Cote à cote mobile) -->
+            <div class="bg-gray-900 border border-gray-800 p-4 sm:p-6 mb-8 relative">
+                <div class="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.02)_25%,rgba(255,255,255,0.02)_50%,transparent_50%,transparent_75%,rgba(255,255,255,0.02)_75%,rgba(255,255,255,0.02)_100%)] bg-[length:20px_20px] pointer-events-none"></div>
+                
+                <h4 class="font-mono text-[10px] sm:text-xs text-gray-500 uppercase tracking-[4px] mb-4 sm:mb-6 border-b border-gray-800 pb-2 text-center">
+                    > Transmission Sécurisée : Fin de Mission
+                </h4>
+                
+                <div class="grid grid-cols-2 gap-3 sm:gap-6 relative z-10">
+                    
+                    <!-- Colonne Action Rouge -->
+                    <div class="flex flex-col gap-2">
+                        <div class="text-[9px] sm:text-xs font-bold text-spy-red uppercase mb-1 text-center tracking-widest">Victoire Rouge</div>
+                        
+                        <button onclick="addWin('red', 'agents')" class="flex-1 bg-spy-red/10 border border-spy-red/50 text-spy-red hover:bg-spy-red hover:text-white transition-all p-3 flex flex-col items-center justify-center gap-1 group">
+                            <span class="text-xl sm:text-2xl opacity-80 group-hover:opacity-100">🕵️‍♂️</span>
+                            <span class="text-[8px] sm:text-[10px] font-bold uppercase leading-tight text-center">Agents Trouvés</span>
+                        </button>
+                        
+                        <button onclick="addWin('red', 'assassin')" class="flex-1 bg-black border border-gray-700 text-gray-400 hover:border-spy-red hover:text-spy-red transition-all p-3 flex flex-col items-center justify-center gap-1 group">
+                            <span class="text-xl sm:text-2xl opacity-50 group-hover:opacity-100">☠️</span>
+                            <span class="text-[8px] sm:text-[10px] font-bold uppercase leading-tight text-center">Bleus ont touché l'assassin</span>
+                        </button>
+                    </div>
+
+                    <!-- Colonne Action Bleue -->
+                    <div class="flex flex-col gap-2">
+                        <div class="text-[9px] sm:text-xs font-bold text-spy-blue uppercase mb-1 text-center tracking-widest">Victoire Bleue</div>
+                        
+                        <button onclick="addWin('blue', 'agents')" class="flex-1 bg-spy-blue/10 border border-spy-blue/50 text-spy-blue hover:bg-spy-blue hover:text-white transition-all p-3 flex flex-col items-center justify-center gap-1 group">
+                            <span class="text-xl sm:text-2xl opacity-80 group-hover:opacity-100">🕵️‍♂️</span>
+                            <span class="text-[8px] sm:text-[10px] font-bold uppercase leading-tight text-center">Agents Trouvés</span>
+                        </button>
+                        
+                        <button onclick="addWin('blue', 'assassin')" class="flex-1 bg-black border border-gray-700 text-gray-400 hover:border-spy-blue hover:text-spy-blue transition-all p-3 flex flex-col items-center justify-center gap-1 group">
+                            <span class="text-xl sm:text-2xl opacity-50 group-hover:opacity-100">☠️</span>
+                            <span class="text-[8px] sm:text-[10px] font-bold uppercase leading-tight text-center">Rouges ont touché l'assassin</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- History log (Dossier) -->
+            <div class="bg-spy-folder p-1 shadow-lg text-black max-w-2xl mx-auto transform -rotate-1 mt-8">
+                <div class="border border-black/20 p-4">
+                    <h4 class="font-typewriter font-bold text-sm sm:text-lg border-b border-black/20 pb-2 mb-3">// HISTORIQUE DES MISSIONS</h4>
+                    <ul id="mission-log" class="font-typewriter text-xs sm:text-sm space-y-2">
+                        <li class="text-gray-600 italic">En attente du premier rapport...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let scores = { red: 0, blue: 0 };
+        let history = [];
+        let names = { red: 'Rouges', blue: 'Bleus' };
+
+        function startGame() {
+            // Lecture des inputs ou placeholder par défaut
+            const inputRed = document.getElementById('red-team-name').value.trim();
+            const inputBlue = document.getElementById('blue-team-name').value.trim();
+            
+            names.red = inputRed !== '' ? inputRed : 'Rouges';
+            names.blue = inputBlue !== '' ? inputBlue : 'Bleus';
+            
+            document.getElementById('display-red-name').innerText = names.red;
+            document.getElementById('display-blue-name').innerText = names.blue;
+            
+            document.getElementById('setup-section').classList.add('hidden');
+            document.getElementById('game-section').classList.remove('hidden');
+        }
+
+        function addWin(team, reason) {
+            scores[team]++;
+            document.getElementById(`score-${team}`).innerText = scores[team];
+            
+            // Animation "Glitch" sur le score
+            const scoreElement = document.getElementById(`score-${team}`);
+            scoreElement.classList.add('scale-125', team === 'red' ? 'text-spy-red' : 'text-spy-blue');
+            setTimeout(() => {
+                scoreElement.classList.remove('scale-125', 'text-spy-red', 'text-spy-blue');
+            }, 200);
+
+            // Log
+            const missionNum = history.length + 1;
+            const winnerName = team === 'red' ? names.red : names.blue;
+            const loserName = team === 'red' ? names.blue : names.red;
+            const colorClass = team === 'red' ? 'text-red-700 font-bold' : 'text-blue-700 font-bold';
+            
+            let logText = "";
+            if(reason === 'agents') {
+                logText = `Opération ${missionNum} : Succès pour <span class="${colorClass}">${winnerName}</span>.`;
+            } else {
+                logText = `Opération ${missionNum} : Échec critique. <span class="${team === 'red' ? 'text-blue-700' : 'text-red-700'}">${loserName}</span> a contacté l'Assassin. <span class="${colorClass}">${winnerName}</span> l'emporte.`;
+            }
+            
+            history.push(logText);
+            updateLog();
+        }
+
+        function updateLog() {
+            const logElement = document.getElementById('mission-log');
+            logElement.innerHTML = history.slice().reverse().map(h => `<li class="border-b border-black/10 pb-1.5 last:border-0">${h}</li>`).join('');
+        }
+
+        function resetGame() {
+            if(history.length === 0 || confirm("Détruire ce dossier de renseignement et commencer une nouvelle partie ?")) {
+                scores = { red: 0, blue: 0 };
+                history = [];
+                document.getElementById('score-red').innerText = "0";
+                document.getElementById('score-blue').innerText = "0";
+                
+                document.getElementById('mission-log').innerHTML = '<li class="text-gray-600 italic">En attente du premier rapport...</li>';
+                
+                // Vidage des champs pour réutiliser les placeholders
+                document.getElementById('red-team-name').value = '';
+                document.getElementById('blue-team-name').value = '';
+
+                document.getElementById('setup-section').classList.remove('hidden');
+                document.getElementById('game-section').classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
