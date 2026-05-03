@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courtisans — Le Dîner Annuel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Ajout de Chart.js pour le graphique -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Crimson Pro", "serif"],
+                        display: ["Cinzel", "serif"],
+                    },
+                    colors: {
+                        royal: {
+                            deep: '#072A33',     /* Fond principal très sombre */
+                            teal: '#0F4C5C',     /* Bleu canard du jeu */
+                            gold: '#D4AF37',     /* Or Art Déco */
+                            golddim: '#8A7020',  /* Or assombri */
+                            parchment: '#F9F6F0',/* Parchemin très clair / blanc cassé */
+                            ink: '#1A202C',      /* Encre foncée */
+                            lumiere: '#D97706',  /* Soleil/Or brillant */
+                            disgrace: '#9B2C2C', /* Rouge profond */
+                        }
+                    },
+                    backgroundImage: {
+                        'deco-pattern': "radial-gradient(circle at center, rgba(212,175,55,0.05) 0%, transparent 70%), linear-gradient(0deg, rgba(7,42,51,1) 0%, rgba(15,76,92,1) 100%)",
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #072A33;
+            color: #F9F6F0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .art-deco-border {
+            position: relative;
+            border: 1px solid #D4AF37;
+        }
+        .art-deco-border::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            pointer-events: none;
+        }
+
+        .bg-parchment {
+            background-color: #F9F6F0;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+            color: #1A202C;
+        }
+
+        .wax-seal {
+            background: radial-gradient(circle at 30% 30%, #a82424, #731212);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.3);
+            border: 2px solid #5a0c0c;
+        }
+
+        .accordion-content {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 800px;
+            opacity: 1;
+        }
+
+        /* Masquer les petites flèches (spinners) dans le champ number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen bg-deco-pattern flex flex-col items-center">
+
+    <!-- ÉCRAN D'INVITATION (Setup) -->
+    <div id="setup-screen" class="w-full min-h-screen flex flex-col justify-center items-center p-4 relative z-10">
+        <div class="max-w-md w-full bg-parchment art-deco-border p-8 md:p-10 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            <div class="mb-4 flex justify-center text-4xl">👑</div>
+            <h1 class="font-display text-4xl md:text-5xl text-royal-ink tracking-widest font-bold mb-2">COURTISANS</h1>
+            <p class="font-display text-sm tracking-[0.2em] text-royal-golddim uppercase mb-8 border-b border-royal-golddim/30 pb-4">
+                Registre des Dîners
+            </p>
+
+            <div id="player-list" class="space-y-3 mb-8 text-left">
+                <!-- Les invités injectés ici -->
+            </div>
+            
+            <button type="button" onclick="addPlayer()" class="text-royal-golddim font-display text-xs tracking-widest hover:text-royal-ink transition-colors uppercase mb-8">
+                + Ajouter un convive (Max 5)
+            </button>
+            
+            <button type="button" onclick="startGame()" class="w-full py-4 bg-royal-teal text-royal-gold font-display text-lg tracking-[0.1em] hover:bg-royal-deep transition-all shadow-lg border border-royal-gold">
+                Ouvrir le Banquet
+            </button>
+        </div>
+    </div>
+
+    <!-- ÉCRAN DE JEU (Le Banquet & Archives) -->
+    <div id="game-screen" class="hidden w-full max-w-5xl mx-auto pb-24 relative z-10 flex flex-col min-h-screen">
+        
+        <header class="flex justify-between items-center p-4 md:px-6 md:py-6 bg-royal-deep/90 sticky top-0 z-50 border-b border-royal-gold/30 shadow-md backdrop-blur-sm">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="p-2 hover:bg-white/10 transition-colors rounded-full border border-royal-gold/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </a>
+                <div class="flex flex-col">
+                    <h1 class="font-display text-xl md:text-2xl tracking-[0.2em] text-royal-gold uppercase leading-none">COURTISANS</h1>
+                    <span id="round-indicator" class="text-royal-parchment/60 text-[10px] md:text-xs font-display tracking-widest mt-1">Dîner N°1</span>
+                </div>
+            </div>
+            <button onclick="quitGame()" class="px-3 py-1.5 border border-royal-gold/50 text-royal-gold font-display text-[10px] tracking-widest hover:bg-royal-gold/10 transition-colors uppercase">
+                Quitter
+            </button>
+        </header>
+
+        <!-- Navigation Mobile (Onglets) -->
+        <div class="lg:hidden flex border-b border-royal-gold/20 bg-royal-deep/95 sticky top-[72px] md:top-[80px] z-40 shadow-sm">
+            <button onclick="setActiveTab('input')" id="tab-input" class="flex-1 py-4 flex items-center justify-center gap-2 font-display text-xs tracking-widest transition-all text-royal-gold border-b-2 border-royal-gold bg-royal-gold/5 font-bold">
+                LE REPAS
+            </button>
+            <button onclick="setActiveTab('stats')" id="tab-stats" class="flex-1 py-4 flex items-center justify-center gap-2 font-display text-xs tracking-widest transition-all text-royal-parchment/50 border-b-2 border-transparent font-bold">
+                ARCHIVES
+            </button>
+        </div>
+
+        <main class="flex-1 p-3 sm:p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+                
+                <!-- SECTION 1 : SAISIE (Le Repas) -->
+                <section id="section-input" class="lg:col-span-8 space-y-8">
+                    
+                    <!-- L'ILLUSTRATION ET LES BOUTONS -->
+                    <div class="art-deco-border bg-parchment p-3 sm:p-5 shadow-2xl relative rounded">
+                        <div class="text-center mb-6">
+                            <h2 class="font-display text-xl sm:text-2xl tracking-widest text-royal-ink uppercase font-bold">La Table de la Reine</h2>
+                            <p class="text-[12px] sm:text-sm text-royal-ink/60 italic mt-1">Cliquez sur ☀️ (Lumière) ou 🌑 (Disgrâce)</p>
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- BOUTONS LUMIÈRE (Au-dessus)                -->
+                        <!-- ========================================== -->
+                        <div class="relative w-full h-10 sm:h-12 mb-2">
+                            <button onclick="toggleQueenStatus('papillon', 1)" id="btn-up-papillon" style="left: 9%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-up-papillon">☀️</span>
+                            </button>
+                            <button onclick="toggleQueenStatus('crapaud', 1)" id="btn-up-crapaud" style="left: 23%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-up-crapaud">☀️</span>
+                            </button>
+                            <button onclick="toggleQueenStatus('rossignol', 1)" id="btn-up-rossignol" style="left: 36%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-up-rossignol">☀️</span>
+                            </button>
+                            <button onclick="toggleQueenStatus('lievre', 1)" id="btn-up-lievre" style="left: 64%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-up-lievre">☀️</span>
+                            </button>
+                            <button onclick="toggleQueenStatus('cerf', 1)" id="btn-up-cerf" style="left: 77%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-up-cerf">☀️</span>
+                            </button>
+                            <button onclick="toggleQueenStatus('carpe', 1)" id="btn-up-carpe" style="left: 91%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-up-carpe">☀️</span>
+                            </button>
+                        </div>
+
+                        <!-- L'image originale -->
+                        <div class="w-full relative rounded overflow-hidden border-2 border-royal-ink/80 shadow-md">
+                            <img src="./table_reine.png" alt="Table de la Reine" class="w-full h-auto object-cover block" />
+                        </div>
+
+                        <!-- ========================================== -->
+                        <!-- BOUTONS DISGRÂCE (En-dessous)              -->
+                        <!-- ========================================== -->
+                        <div class="relative w-full h-10 sm:h-12 mt-2">
+                            <button onclick="toggleQueenStatus('papillon', -1)" id="btn-down-papillon" style="left: 9%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-down-papillon">🌑</span>
+                            </button>
+                            <button onclick="toggleQueenStatus('crapaud', -1)" id="btn-down-crapaud" style="left: 23%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-down-crapaud">🌑</span>
+                            </button>
+                            <button onclick="toggleQueenStatus('rossignol', -1)" id="btn-down-rossignol" style="left: 36%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-down-rossignol">🌑</span>
+                            </button>
+                            <button onclick="toggleQueenStatus('lievre', -1)" id="btn-down-lievre" style="left: 64%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-down-lievre">🌑</span>
+                            </button>
+                            <button onclick="toggleQueenStatus('cerf', -1)" id="btn-down-cerf" style="left: 77%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-down-cerf">🌑</span>
+                            </button>
+                            <button onclick="toggleQueenStatus('carpe', -1)" id="btn-down-carpe" style="left: 91%; transform: translateX(-50%);" class="absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all">
+                                <span class="text-sm opacity-50" id="icon-down-carpe">🌑</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- LES DOMAINES (ACCORDÉONS) -->
+                    <div>
+                        <div class="flex justify-between items-end mb-4 px-2">
+                            <h2 class="font-display text-xl tracking-widest text-royal-gold uppercase">
+                                Domaines des Invités
+                            </h2>
+                        </div>
+                        <div id="player-inputs" class="space-y-4">
+                            <!-- Injecté par JS -->
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="validateRound()" class="w-full py-5 bg-royal-gold text-royal-ink font-display text-xl tracking-[0.1em] hover:bg-[#E5A91A] transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] border-2 border-royal-parchment font-bold">
+                        Valider ce Dîner
+                    </button>
+                </section>
+
+                <!-- SECTION 2 : ARCHIVES, GRAPHIQUE & RÉSULTATS -->
+                <div id="section-stats" class="lg:col-span-4 hidden lg:block">
+                    <div class="sticky top-[100px] space-y-6">
+                        
+                        <!-- CLASSEMENT EN DIRECT -->
+                        <section class="bg-parchment art-deco-border p-5 shadow-2xl">
+                            <h2 class="font-display text-lg tracking-widest text-royal-ink uppercase mb-4 text-center border-b border-royal-ink/20 pb-3">
+                                Faveurs Actuelles
+                            </h2>
+                            <div id="scoreboard" class="space-y-3">
+                                <!-- Scores injectés -->
+                            </div>
+                        </section>
+
+                        <!-- GRAPHIQUE D'ÉVOLUTION -->
+                        <section id="chart-section" class="bg-royal-deep art-deco-border p-5 shadow-2xl hidden">
+                            <h2 class="font-display text-lg tracking-widest text-royal-gold uppercase mb-4 text-center border-b border-royal-gold/20 pb-3">
+                                Évolution de la Cour
+                            </h2>
+                            <div class="h-[250px] w-full">
+                                <canvas id="historyChart"></canvas>
+                            </div>
+                        </section>
+
+                        <!-- HISTORIQUE DES PARTIES -->
+                        <section id="history-section" class="bg-royal-deep art-deco-border p-5 shadow-2xl hidden">
+                            <h2 class="font-display text-lg tracking-widest text-royal-gold uppercase mb-4 text-center border-b border-royal-gold/20 pb-3">
+                                Registre Historique
+                            </h2>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-center text-sm font-sans border-collapse text-royal-parchment">
+                                    <thead>
+                                        <tr id="history-header" class="border-b-2 border-royal-gold/30 text-xs text-royal-golddim uppercase tracking-wider">
+                                            <!-- Headers injectés -->
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-body" class="divide-y divide-royal-gold/10">
+                                        <!-- Lignes injectées -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button type="button" onclick="resetForNewRound()" class="w-full mt-6 py-3 border border-royal-gold text-royal-gold font-display text-sm tracking-widest hover:bg-royal-gold hover:text-royal-ink transition-all uppercase">
+                                Préparer un Nouveau Dîner
+                            </button>
+                        </section>
+
+                        <!-- RAPPEL RÈGLES -->
+                        <div class="mt-8 border-t border-royal-gold/30 pt-6">
+                            <p class="font-display text-xs text-royal-gold uppercase tracking-widest mb-3 text-center">Rappel Royal</p>
+                            <ul class="text-sm text-royal-parchment/80 space-y-2 leading-snug">
+                                <li class="flex items-start gap-2">
+                                    <span class="text-royal-lumiere">☀️</span> <span>Famille dans la lumière : <b>+1 pt</b> / carte.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-royal-disgrace">🌑</span> <span>Famille en disgrâce : <b>-1 pt</b> / carte.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-gray-400">⚖️</span> <span>Famille neutre : <b>0 pt</b>.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-blue-400">📜</span> <span>Mission validée : <b>+3 pts</b>.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let players = ['Seigneur 1', 'Dame 2'];
+        let round = 1;
+        let historyData = [];
+        let chart = null; // Variable globale pour le graphique
+        
+        // Palette royale pour le graphique
+        const CHART_COLORS = ['#D4AF37', '#0F4C5C', '#9B2C2C', '#F9F6F0', '#E5A91A'];
+
+        // Familles avec les icônes (emojis) et couleurs correspondantes au fanions
+        const FAMILIES = [
+            { id: 'papillon', name: 'Papillon', icon: '🦋', color: 'text-slate-500' },
+            { id: 'crapaud', name: 'Crapaud', icon: '🐸', color: 'text-lime-600' },
+            { id: 'rossignol', name: 'Rossignol', icon: '🦉', color: 'text-rose-600' },
+            { id: 'lievre', name: 'Lièvre', icon: '🐰', color: 'text-yellow-600' },
+            { id: 'cerf', name: 'Cerf', icon: '🦌', color: 'text-teal-700' },
+            { id: 'carpe', name: 'Carpe', icon: '🐟', color: 'text-blue-600' }
+        ];
+
+        let queenStatus = { papillon: 0, crapaud: 0, rossignol: 0, lievre: 0, cerf: 0, carpe: 0 };
+        let playerData = {};
+        let activeTab = 'input';
+
+        document.addEventListener('DOMContentLoaded', () => { renderPlayerList(); });
+
+        /* --- SETUP --- */
+        function renderPlayerList() {
+            const list = document.getElementById('player-list');
+            list.innerHTML = players.map((p, i) => {
+                const isDefault = /^Seigneur \d+$/.test(p) || /^Dame \d+$/.test(p);
+                const displayValue = isDefault ? '' : p;
+                const placeholderValue = isDefault ? p : (i%2===0 ? `Seigneur ${i+1}` : `Dame ${i+1}`);
+
+                return `
+                <div class="flex items-center gap-3 border-b border-royal-ink/10 pb-2">
+                    <span class="text-royal-golddim font-display">I${'I'.repeat(i)}</span>
+                    <input
+                        class="flex-1 bg-transparent border-none text-royal-ink font-sans text-xl outline-none placeholder-royal-ink/30 italic"
+                        value="${displayValue}"
+                        placeholder="${placeholderValue}"
+                        onchange="updatePlayerName(${i}, this.value)"
+                    />
+                    ${players.length > 2 ? `
+                        <button type="button" onclick="removePlayer(${i})" class="text-royal-ink/30 hover:text-royal-disgrace text-xl">×</button>
+                    ` : ''}
+                </div>
+            `}).join('');
+        }
+
+        function addPlayer() {
+            if (players.length < 5) {
+                players.push(players.length % 2 === 0 ? `Seigneur ${players.length + 1}` : `Dame ${players.length + 1}`);
+                renderPlayerList();
+            }
+        }
+
+        function removePlayer(index) { players.splice(index, 1); renderPlayerList(); }
+        
+        function updatePlayerName(index, name) {
+            players[index] = name.trim() || (index%2===0 ? `Seigneur ${index+1}` : `Dame ${index+1}`);
+        }
+
+        /* --- NAVIGATION --- */
+        function setActiveTab(tab) {
+            activeTab = tab;
+            const sInput = document.getElementById('section-input');
+            const sStats = document.getElementById('section-stats');
+            const tInput = document.getElementById('tab-input');
+            const tStats = document.getElementById('tab-stats');
+
+            if (tab === 'input') {
+                sInput.classList.remove('hidden'); sStats.classList.add('hidden', 'lg:block');
+                tInput.classList.replace('text-royal-parchment/50', 'text-royal-gold');
+                tInput.classList.replace('border-transparent', 'border-royal-gold');
+                tInput.classList.add('bg-royal-gold/5');
+                tStats.classList.replace('text-royal-gold', 'text-royal-parchment/50');
+                tStats.classList.replace('border-royal-gold', 'border-transparent');
+                tStats.classList.remove('bg-royal-gold/5');
+            } else {
+                sInput.classList.add('hidden'); sStats.classList.remove('hidden');
+                tStats.classList.replace('text-royal-parchment/50', 'text-royal-gold');
+                tStats.classList.replace('border-transparent', 'border-royal-gold');
+                tStats.classList.add('bg-royal-gold/5');
+                tInput.classList.replace('text-royal-gold', 'text-royal-parchment/50');
+                tInput.classList.replace('border-royal-gold', 'border-transparent');
+                tInput.classList.remove('bg-royal-gold/5');
+                
+                // Mettre à jour le graph quand on arrive sur l'onglet
+                if(chart) chart.update();
+            }
+        }
+
+        /* --- GAME INIT --- */
+        function startGame() {
+            round = 1;
+            historyData = [];
+            initPlayerData();
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            document.getElementById('round-indicator').innerText = `Dîner N°${round}`;
+            resetQueenVisuals();
+            renderPlayerInputs();
+            calculateScores();
+            updateHistoryUI();
+            updateChart();
+            window.scrollTo(0, 0);
+        }
+
+        function initPlayerData() {
+            playerData = {};
+            players.forEach(p => {
+                playerData[p] = { missions: 0 };
+                FAMILIES.forEach(f => playerData[p][f.id] = 0);
+            });
+        }
+
+        function quitGame() {
+            if (confirm('Souhaitez-vous vraiment quitter ? L\'historique sera perdu.')) {
+                document.getElementById('setup-screen').classList.remove('hidden');
+                document.getElementById('game-screen').classList.add('hidden');
+                for(let k in queenStatus) queenStatus[k] = 0;
+            }
+        }
+
+        /* --- QUEEN'S TABLE --- */
+        function toggleQueenStatus(familyId, value) {
+            if (queenStatus[familyId] === value) {
+                queenStatus[familyId] = 0; // Toggle off
+            } else {
+                queenStatus[familyId] = value;
+            }
+            updateQueenVisuals(familyId);
+            updatePlayerInputsVisuals();
+            calculateScores();
+        }
+
+        function updateQueenVisuals(familyId) {
+            const btnUp = document.getElementById(`btn-up-${familyId}`);
+            const iconUp = document.getElementById(`icon-up-${familyId}`);
+            const btnDown = document.getElementById(`btn-down-${familyId}`);
+            const iconDown = document.getElementById(`icon-down-${familyId}`);
+            
+            const status = queenStatus[familyId];
+
+            // Reset
+            btnUp.className = "absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all";
+            iconUp.className = "text-sm opacity-50 transition-opacity";
+            
+            btnDown.className = "absolute top-0 w-10 h-10 border border-gray-300 rounded flex items-center justify-center bg-white shadow-sm hover:border-royal-gold transition-all";
+            iconDown.className = "text-sm opacity-50 transition-opacity";
+
+            if (status === 1) {
+                btnUp.classList.add('bg-yellow-100', 'border-yellow-400', 'shadow-[0_0_10px_#D97706]');
+                iconUp.classList.replace('opacity-50', 'opacity-100');
+            } else if (status === -1) {
+                btnDown.classList.add('bg-red-100', 'border-red-400', 'shadow-[0_0_10px_#9B2C2C]');
+                iconDown.classList.replace('opacity-50', 'opacity-100');
+            }
+        }
+
+        function resetQueenVisuals() {
+            for(let key in queenStatus) {
+                queenStatus[key] = 0;
+                updateQueenVisuals(key);
+            }
+        }
+
+        /* --- PLAYER DOMAINS (ACCORDIONS) --- */
+        function renderPlayerInputs() {
+            const container = document.getElementById('player-inputs');
+            container.innerHTML = players.map((p, i) => `
+                <div class="bg-parchment art-deco-border shadow-md rounded">
+                    <!-- HEADER ACCORDION -->
+                    <div class="flex justify-between items-center p-3 sm:p-4 cursor-pointer hover:bg-royal-gold/5 transition-colors" onclick="toggleAccordion(${i})">
+                        <div class="flex items-center gap-3">
+                            <span class="font-display text-royal-golddim text-sm">${i+1}.</span>
+                            <span class="font-sans font-bold text-lg sm:text-xl text-royal-ink">${p}</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-right">
+                                <span id="score-header-${i}" class="font-sans font-bold text-2xl text-royal-ink leading-none">0</span>
+                                <span class="text-[10px] uppercase text-royal-ink/50 font-bold ml-1">pts</span>
+                            </div>
+                            <svg id="chevron-${i}" class="w-5 h-5 text-royal-ink/40 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </div>
+
+                    <!-- CONTENU ACCORDION -->
+                    <div id="content-${i}" class="accordion-content bg-white/60 border-t border-royal-ink/10">
+                        <div class="p-3 sm:p-5">
+                            
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
+                                ${FAMILIES.map(f => `
+                                    <div class="flex items-center justify-between p-2 rounded-lg border border-royal-ink/20 bg-white shadow-sm">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-2xl">${f.icon}</span>
+                                            <div class="flex flex-col">
+                                                <span class="font-display font-bold text-royal-ink text-[11px] uppercase">${f.name}</span>
+                                                <span id="multiplier-${i}-${f.id}" class="text-[10px] text-gray-400 font-bold uppercase">= 0 pt</span>
+                                            </div>
+                                        </div>
+                                        <!-- CHAMP NUMÉRIQUE (Téléphone) -->
+                                        <input type="number" inputmode="numeric" id="input-${i}-${f.id}" 
+                                            class="w-12 h-10 bg-gray-50 border border-gray-200 rounded text-center font-sans text-xl font-bold text-royal-ink outline-none focus:border-royal-gold focus:ring-1 focus:ring-royal-gold" 
+                                            placeholder="0" min="0" oninput="updateCard('${p}', '${f.id}', this.value, ${i})" onfocus="this.select()">
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <!-- Missions -->
+                            <div class="bg-royal-ink/5 p-3 rounded flex flex-col sm:flex-row sm:justify-between sm:items-center border border-royal-ink/10 gap-3">
+                                <div class="flex items-center gap-2 text-blue-900">
+                                    <span class="text-lg">📜</span>
+                                    <span class="font-display text-xs uppercase font-bold tracking-widest">Missions validées (+3 pts)</span>
+                                </div>
+                                <div class="flex bg-white rounded p-1 border border-royal-ink/20 w-full sm:w-auto">
+                                    <button class="mission-btn-${i} flex-1 sm:px-5 py-2 rounded text-sm font-bold bg-royal-ink text-royal-parchment" onclick="setMission('${p}', 0, ${i}, this)">0</button>
+                                    <button class="mission-btn-${i} flex-1 sm:px-5 py-2 rounded text-sm font-bold text-royal-ink hover:bg-gray-100 transition-colors" onclick="setMission('${p}', 1, ${i}, this)">1</button>
+                                    <button class="mission-btn-${i} flex-1 sm:px-5 py-2 rounded text-sm font-bold text-royal-ink hover:bg-gray-100 transition-colors" onclick="setMission('${p}', 2, ${i}, this)">2</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            toggleAccordion(0);
+            updatePlayerInputsVisuals();
+        }
+
+        function toggleAccordion(index) {
+            const content = document.getElementById(`content-${index}`);
+            const chevron = document.getElementById(`chevron-${index}`);
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                chevron.classList.remove('rotate-180');
+            } else {
+                players.forEach((_, i) => {
+                    document.getElementById(`content-${i}`).classList.remove('open');
+                    document.getElementById(`chevron-${i}`).classList.remove('rotate-180');
+                });
+                content.classList.add('open');
+                chevron.classList.add('rotate-180');
+            }
+        }
+
+        function updateCard(playerName, familyId, value, pIndex) {
+            let val = parseInt(value) || 0;
+            if (val < 0) {
+                val = 0;
+                document.getElementById(`input-${pIndex}-${familyId}`).value = '';
+            }
+            playerData[playerName][familyId] = val;
+            calculateScores();
+        }
+
+        function setMission(playerName, value, pIndex, btn) {
+            playerData[playerName].missions = value;
+            const buttons = document.querySelectorAll(`.mission-btn-${pIndex}`);
+            buttons.forEach(b => b.classList.replace('bg-royal-ink', 'hover:bg-gray-100'));
+            buttons.forEach(b => b.classList.remove('text-royal-parchment'));
+            btn.classList.add('bg-royal-ink', 'text-royal-parchment');
+            btn.classList.remove('hover:bg-gray-100');
+            calculateScores();
+        }
+
+        function updatePlayerInputsVisuals() {
+            players.forEach((p, i) => {
+                FAMILIES.forEach(f => {
+                    const status = queenStatus[f.id];
+                    const label = document.getElementById(`multiplier-${i}-${f.id}`);
+                    const inputField = document.getElementById(`input-${i}-${f.id}`);
+                    
+                    if (status === 1) {
+                        label.innerText = "+1 pt"; label.className = "text-[10px] font-bold text-[#b58000] uppercase";
+                        inputField.className = "w-12 h-10 bg-yellow-50 border border-yellow-300 rounded text-center font-sans text-xl font-bold text-[#b58000] outline-none focus:border-royal-gold focus:ring-1 focus:ring-royal-gold transition-colors";
+                    } else if (status === -1) {
+                        label.innerText = "-1 pt"; label.className = "text-[10px] font-bold text-royal-disgrace uppercase";
+                        inputField.className = "w-12 h-10 bg-red-50 border border-red-300 rounded text-center font-sans text-xl font-bold text-royal-disgrace outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-colors";
+                    } else {
+                        label.innerText = "0 pt"; label.className = "text-[10px] font-bold text-gray-400 uppercase";
+                        inputField.className = "w-12 h-10 bg-gray-50 border border-gray-200 rounded text-center font-sans text-xl font-bold text-royal-ink outline-none focus:border-royal-gold focus:ring-1 focus:ring-royal-gold transition-colors";
+                    }
+                });
+            });
+        }
+
+        /* --- CALCUL ET RÉSULTATS --- */
+        function calculateScores() {
+            const results = [];
+            players.forEach((p, i) => {
+                let total = 0;
+                FAMILIES.forEach(f => { total += (playerData[p][f.id] * queenStatus[f.id]); });
+                total += (playerData[p].missions * 3);
+                
+                document.getElementById(`score-header-${i}`).innerText = total;
+                results.push({ name: p, score: total });
+            });
+            updateScoreboard(results);
+            return results;
+        }
+
+        function updateScoreboard(results) {
+            const sb = document.getElementById('scoreboard');
+            const sorted = [...results].sort((a, b) => b.score - a.score);
+            
+            sb.innerHTML = sorted.map((r, index) => {
+                const isWinner = index === 0 && r.score !== 0; 
+                return `
+                <div class="flex items-center justify-between border-b border-royal-ink/10 pb-2 last:border-0 last:pb-0">
+                    <div class="flex items-center gap-2">
+                        <span class="font-display text-royal-golddim text-xs">${index + 1}.</span>
+                        <span class="font-sans font-bold text-base text-royal-ink">${r.name}</span>
+                        ${isWinner ? '<span title="Vainqueur">👑</span>' : ''}
+                    </div>
+                    <div class="${isWinner ? 'wax-seal text-white border-[#5a0c0c]' : 'bg-royal-ink/5 text-royal-ink border-royal-ink/20'} w-8 h-8 rounded-full flex items-center justify-center font-sans font-bold border">
+                        ${r.score}
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        /* --- VALIDATION, HISTORIQUE & GRAPHIQUE --- */
+        function validateRound() {
+            const finalScores = calculateScores();
+            
+            let roundData = {};
+            finalScores.forEach(r => { roundData[r.name] = r.score; });
+            historyData.push(roundData);
+            
+            updateHistoryUI();
+            updateChart(); // Mettre à jour le graphique à chaque dîner validé
+            
+            if (window.innerWidth < 1024) setActiveTab('stats');
+            else document.getElementById('history-section').scrollIntoView({behavior: "smooth"});
+        }
+
+        function updateHistoryUI() {
+            const historySec = document.getElementById('history-section');
+            const thead = document.getElementById('history-header');
+            const tbody = document.getElementById('history-body');
+            
+            if (historyData.length === 0) { historySec.classList.add('hidden'); return; }
+            historySec.classList.remove('hidden');
+
+            thead.innerHTML = `<th class="p-3 font-medium">N°</th>` + 
+                players.map(p => `<th class="p-3 font-medium whitespace-nowrap">${p}</th>`).join('');
+
+            let rows = '';
+            for (let i = historyData.length - 1; i >= 0; i--) {
+                let max = Math.max(...players.map(p => historyData[i][p]));
+                rows += `<tr class="hover:bg-white/5 transition-colors">
+                    <td class="p-3 font-mono text-royal-gold/50">${i + 1}</td>
+                    ${players.map(p => {
+                        const score = historyData[i][p];
+                        const isWin = score === max && score !== 0;
+                        return `<td class="p-3 font-sans font-bold text-base ${isWin ? 'text-royal-gold' : 'text-royal-parchment/80'}">
+                            ${score} ${isWin ? '<span class="text-xs">👑</span>' : ''}
+                        </td>`;
+                    }).join('')}
+                </tr>`;
+            }
+            tbody.innerHTML = rows;
+        }
+
+        function updateChart() {
+            const chartSec = document.getElementById('chart-section');
+            if (historyData.length === 0) {
+                chartSec.classList.add('hidden');
+                return;
+            }
+            chartSec.classList.remove('hidden');
+
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            
+            const labels = historyData.map((_, i) => `Dîner ${i + 1}`);
+            const datasets = players.map((p, i) => {
+                const color = CHART_COLORS[i % CHART_COLORS.length];
+                return {
+                    label: p,
+                    data: historyData.map(h => h[p]),
+                    borderColor: color,
+                    backgroundColor: color + '33', // avec transparence
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: color,
+                    tension: 0.3,
+                    fill: false
+                };
+            });
+
+            if (chart) {
+                chart.data.labels = labels;
+                chart.data.datasets = datasets;
+                chart.update();
+            } else {
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels, datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(212,175,55,0.1)' },
+                                ticks: { color: '#F9F6F0', font: { family: 'Crimson Pro', size: 12 } }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#D4AF37', font: { family: 'Cinzel', size: 10 } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: '#F9F6F0', font: { family: 'Cinzel', size: 12 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function resetForNewRound() {
+            round++;
+            document.getElementById('round-indicator').innerText = `Dîner N°${round}`;
+            
+            initPlayerData();
+            resetQueenVisuals();
+            renderPlayerInputs();
+            calculateScores();
+            
+            if (window.innerWidth < 1024) setActiveTab('input');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+    </script>
+</body>
+</html>
