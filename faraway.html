@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faraway — BEN'ARCADE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Nunito:wght@400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Nunito", "ui-sans-serif", "system-ui"],
+                        display: ["Playfair Display", "serif"],
+                        mono: ["Share Tech Mono", "monospace"],
+                    },
+                    colors: {
+                        fara: {
+                            bg: '#F8F4E6',
+                            card: '#FCFAF5',
+                            ink: '#3A2E1E',
+                            inkMuted: '#9C8A6E',
+                            purple: '#7B5EA7',
+                            border: '#EAD9B5'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8F4E6;
+            color: #3A2E1E;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Texture parchemin grainée subtile */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        /* Tâches d'aquarelle décoratives (comme sur ta maquette) */
+        .blob-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.3; }
+
+        /* Scrollbar horizontale invisible pour les inputs */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Inputs numériques */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; margin: 0; 
+        }
+        input[type=number] { -moz-appearance: textfield; }
+        
+        .tab-active { border-bottom-color: #7B5EA7; color: #7B5EA7; background: rgba(123, 94, 167, 0.05); }
+
+        /* Toggle Button personnalisé */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #7B5EA7;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #7B5EA7;
+        }
+    </style>
+</head>
+<body class="antialiased pb-20 relative min-h-screen font-sans">
+
+    <!-- AQUARELLES ARRIÈRE-PLAN -->
+    <div class="blob-bg" aria-hidden="true">
+        <div class="blob" style="width:400px;height:400px;top:-50px;left:-100px;background:rgba(196,173,224,0.4);"></div>
+        <div class="blob" style="width:300px;height:300px;bottom:-50px;right:-50px;background:rgba(168,212,210,0.4);"></div>
+        <div class="blob" style="width:350px;height:350px;top:40%;left:50%;transform:translate(-50%,-50%);background:rgba(240,201,122,0.25);"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ÉCRAN DE CONFIGURATION (Reproduction maquette) -->
+    <!-- ========================================== -->
+    <div id="setup-screen" class="relative z-10 min-h-screen flex flex-col justify-center px-4 py-8">
+        
+        <header class="text-center mb-8">
+            <p class="font-sans text-[10px] tracking-[0.2em] text-fara-inkMuted font-bold uppercase mb-4">
+                Continent d'Alula
+            </p>
+            
+            <!-- LOGO FARAWAY -->
+            <img src="./faraway-logo.png" alt="Faraway" class="h-16 md:h-24 mx-auto object-contain drop-shadow-sm mb-3">
+            
+            <p class="font-display italic text-base text-fara-inkMuted mb-6">
+                Par-delà la Mer des Brumes
+            </p>
+            <a href="index.html" class="inline-block text-[10px] tracking-[0.15em] text-fara-inkMuted font-bold uppercase hover:text-fara-ink transition-colors">
+                <span class="mr-1">‹</span> BEN'ARCADE
+            </a>
+        </header>
+
+        <main class="w-full max-w-md mx-auto">
+            <div class="bg-fara-card rounded-[24px] p-6 shadow-sm border border-fara-border">
+                <h2 class="text-[11px] font-bold tracking-widest text-fara-inkMuted uppercase mb-5">
+                    Les Explorateurs
+                </h2>
+                
+                <div id="player-list" class="space-y-4 mb-6">
+                    <!-- Inputs Joueurs injectés ici via JS -->
+                </div>
+                
+                <button type="button" onclick="addPlayer()" class="w-full py-3.5 border border-[#D4BE93] text-fara-inkMuted font-sans text-sm font-bold hover:bg-fara-border/20 transition-colors rounded-xl bg-transparent">
+                    + Ajouter un explorateur
+                </button>
+                
+                <hr class="border-fara-border my-6">
+
+                <!-- Variante avancée Toggle -->
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="variant-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-[#EAD9B5] appearance-none cursor-pointer transition-transform duration-200 ease-in z-10"/>
+                        <label for="variant-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-[#EAD9B5] cursor-pointer transition-colors duration-200 ease-in"></label>
+                    </div>
+                    <div>
+                        <p class="font-sans text-sm text-fara-ink font-bold">Variante avancée</p>
+                        <p class="font-sans text-xs text-fara-inkMuted">5 cartes distribuées, 3 choisies</p>
+                    </div>
+                </div>
+                
+                <button type="button" onclick="startGame()" class="w-full py-4 bg-fara-purple text-white font-sans font-bold text-lg hover:opacity-90 transition-opacity rounded-xl shadow-md">
+                    Partir en exploration →
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ÉCRAN DE JEU (Saisie + Stats) -->
+    <!-- ========================================== -->
+    <div id="game-screen" class="hidden relative z-10 min-h-screen">
+        
+        <!-- Header In-game -->
+        <header class="bg-fara-card/90 backdrop-blur-md border-b border-fara-border sticky top-0 z-50">
+            <div class="px-4 py-3 flex items-center justify-between">
+                <a href="index.html" class="flex items-center gap-1 text-fara-inkMuted hover:text-fara-ink transition-colors font-bold text-xs uppercase tracking-widest">
+                    <span>‹</span> Menu
+                </a>
+                
+                <!-- Logo miniature -->
+                <img src="./faraway-logo.png" alt="Faraway" class="h-8 object-contain">
+                
+                <span id="round-indicator" class="font-sans text-[10px] tracking-widest text-fara-purple uppercase font-bold bg-fara-purple/10 px-2 py-1 rounded">Expéd. 1</span>
+            </div>
+
+            <!-- Navigation Mobile (Tabs) -->
+            <div class="flex border-t border-fara-border lg:hidden bg-white/50">
+                <button onclick="setActiveTab('input')" id="tab-input" class="flex-1 py-3 flex items-center justify-center gap-2 font-sans font-bold text-xs tracking-widest transition-all border-b-2 tab-active text-fara-ink">
+                    CARNET
+                </button>
+                <button onclick="setActiveTab('stats')" id="tab-stats" class="flex-1 py-3 flex items-center justify-center gap-2 font-sans font-bold text-xs tracking-widest transition-all border-b-2 border-transparent text-fara-inkMuted">
+                    STATISTIQUES
+                </button>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto p-4 sm:p-6 mt-2">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- ZONE DE SAISIE (Gauche) -->
+                <section id="section-input" class="lg:col-span-7 pb-10">
+                    <div class="mb-5 text-center">
+                        <p class="font-sans text-xs text-fara-inkMuted font-bold uppercase tracking-widest mb-1">
+                            Calcul de la renommée
+                        </p>
+                        <p class="font-display italic text-sm text-fara-ink">
+                            Décomptez les cartes de droite (8) à gauche (1), puis ajoutez vos Sanctuaires.
+                        </p>
+                    </div>
+
+                    <div id="player-inputs" class="space-y-5">
+                        <!-- Joueurs injectés ici -->
+                    </div>
+
+                    <div class="mt-10">
+                        <button type="button" onclick="validateRound()" class="w-full py-4 bg-fara-purple text-white font-sans font-bold text-lg hover:opacity-90 transition-opacity shadow-md rounded-xl">
+                            Valider l'expédition
+                        </button>
+                    </div>
+                </section>
+
+                <!-- STATISTIQUES & HISTORIQUE (Droite) -->
+                <div id="section-stats" class="lg:col-span-5 space-y-6 hidden lg:block">
+                    
+                    <!-- Podium direct -->
+                    <section class="bg-fara-card border border-fara-border rounded-2xl overflow-hidden shadow-sm">
+                        <div class="bg-fara-ink px-5 py-3 flex justify-between items-center">
+                            <span class="font-display text-lg text-white italic">Classement</span>
+                        </div>
+                        <div id="scoreboard" class="divide-y divide-fara-border/50 p-2">
+                            <!-- Scores injectés -->
+                        </div>
+                    </section>
+
+                    <!-- Graphique Carte par Carte -->
+                    <section class="bg-fara-card border border-fara-border rounded-2xl p-5 shadow-sm">
+                        <div class="font-sans text-xs font-bold tracking-widest text-fara-inkMuted uppercase mb-4 text-center">
+                            Évolution du Voyage (C8 ➔ Sanctuaires)
+                        </div>
+                        <div class="h-[200px] w-full">
+                            <canvas id="evolutionChart"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- Historique (Tableau des parties) -->
+                    <section id="history-section" class="bg-fara-card border border-fara-border overflow-hidden hidden rounded-2xl shadow-sm">
+                        <div class="bg-white/50 px-5 py-3 border-b border-fara-border font-sans text-xs font-bold tracking-widest text-fara-ink uppercase text-center">
+                            Archives
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-center text-sm font-sans">
+                                <thead>
+                                    <tr id="history-header-row" class="bg-white/40 border-b border-fara-border text-xs text-fara-inkMuted tracking-wider">
+                                        <th class="p-3 font-bold">N°</th>
+                                        <!-- Noms Joueurs injectés -->
+                                    </tr>
+                                </thead>
+                                <tbody id="history-body" class="divide-y divide-fara-border/50 text-fara-ink font-bold bg-white/20">
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        // Themes Pastels extraits de la maquette
+        const THEMES = [
+            { bg: '#EDE4F5', border: '#C4ADE0', text: '#7B5EA7' }, // Alice (Violet)
+            { bg: '#E3F4F3', border: '#A8D4D2', text: '#3B7D7A' }, // Bob (Bleu vert)
+            { bg: '#FEF6E4', border: '#F0C97A', text: '#C47A1E' }, // Jaune moutarde
+            { bg: '#FDE8EA', border: '#E8A0A8', text: '#B04A5A' }, // Rose
+            { bg: '#E8F5ED', border: '#94C9A5', text: '#3E7D52' }, // Vert
+            { bg: '#F8EDDF', border: '#D4A878', text: '#B07040' }  // Désert
+        ];
+
+        let players = ['Alice', 'Bob'];
+        
+        // Champs (C8 -> C1 + Sanctuaires)
+        const FIELDS = [
+            { id: 'c8', label: '8' },
+            { id: 'c7', label: '7' },
+            { id: 'c6', label: '6' },
+            { id: 'c5', label: '5' },
+            { id: 'c4', label: '4' },
+            { id: 'c3', label: '3' },
+            { id: 'c2', label: '2' },
+            { id: 'c1', label: '1' },
+            { id: 's',  label: 'Sanctuaires' } // Plus large
+        ];
+
+        let scores = {}; 
+        let historyData = []; 
+        let round = 1;
+        
+        let chart = null;
+        let activeTab = 'input';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPlayerList();
+        });
+
+        // ==========================================
+        // 1. ECRAN SETUP
+        // ==========================================
+        function renderPlayerList() {
+            const list = document.getElementById('player-list');
+            list.innerHTML = players.map((p, i) => {
+                const theme = THEMES[i % THEMES.length];
+                return `
+                <div class="flex items-center gap-3 bg-white p-2 rounded-xl border-2 transition-colors" style="border-color: ${theme.border}">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-sans font-bold text-sm" style="background-color: ${theme.bg}; color: ${theme.text}">
+                        ${i+1}
+                    </div>
+                    <input
+                        class="flex-1 bg-transparent border-none text-fara-ink font-sans text-base font-bold outline-none placeholder-fara-inkMuted/50"
+                        value="${p.startsWith('Explorateur') ? '' : p}"
+                        placeholder="Explorateur ${i + 1}"
+                        onchange="updatePlayerName(${i}, this.value)"
+                        maxlength="15"
+                    />
+                    ${players.length > 2 ? `
+                        <button type="button" onclick="removePlayer(${i})" class="w-10 h-10 flex items-center justify-center text-fara-inkMuted hover:text-red-500 transition-colors text-2xl font-bold pb-1">
+                            ×
+                        </button>
+                    ` : ''}
+                </div>
+                `;
+            }).join('');
+        }
+
+        function addPlayer() {
+            if (players.length < 6) {
+                players.push(`Explorateur ${players.length + 1}`);
+                renderPlayerList();
+            }
+        }
+
+        function removePlayer(index) {
+            players.splice(index, 1);
+            renderPlayerList();
+        }
+
+        function updatePlayerName(index, name) {
+            players[index] = name.trim() || `Explorateur ${index + 1}`;
+        }
+
+        // ==========================================
+        // 2. LANCEMENT DU JEU
+        // ==========================================
+        function startGame() {
+            resetScores();
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            renderInputs();
+            updateScoreboard();
+            initChart();
+            updateHistory();
+        }
+
+        function resetScores() {
+            scores = {};
+            players.forEach(p => {
+                scores[p] = { c8: 0, c7: 0, c6: 0, c5: 0, c4: 0, c3: 0, c2: 0, c1: 0, s: 0 };
+            });
+        }
+
+        function setActiveTab(tab) {
+            activeTab = tab;
+            const sectionInput = document.getElementById('section-input');
+            const sectionStats = document.getElementById('section-stats');
+            const tabInput = document.getElementById('tab-input');
+            const tabStats = document.getElementById('tab-stats');
+
+            if (tab === 'input') {
+                sectionInput.classList.remove('hidden');
+                sectionStats.classList.add('hidden', 'lg:block');
+                
+                tabInput.classList.add('tab-active', 'text-fara-ink');
+                tabInput.classList.remove('border-transparent', 'text-fara-inkMuted');
+                tabStats.classList.remove('tab-active', 'text-fara-ink');
+                tabStats.classList.add('border-transparent', 'text-fara-inkMuted');
+            } else {
+                sectionInput.classList.add('hidden');
+                sectionStats.classList.remove('hidden');
+                
+                tabStats.classList.add('tab-active', 'text-fara-ink');
+                tabStats.classList.remove('border-transparent', 'text-fara-inkMuted');
+                tabInput.classList.remove('tab-active', 'text-fara-ink');
+                tabInput.classList.add('border-transparent', 'text-fara-inkMuted');
+                
+                if (chart) setTimeout(() => chart.update(), 100);
+            }
+        }
+
+        // ==========================================
+        // 3. AFFICHAGE DES INPUTS "EN LIGNE"
+        // ==========================================
+        function renderInputs() {
+            const container = document.getElementById('player-inputs');
+            document.getElementById('round-indicator').innerText = `Expéd. ${round}`;
+            
+            container.innerHTML = players.map((p, i) => {
+                const theme = THEMES[i % THEMES.length];
+                return `
+                <div class="bg-white rounded-[20px] overflow-hidden transition-all duration-300 shadow-sm border" style="border-color: ${theme.border}">
+                    
+                    <!-- En-tête Pastelle (Sans le petit rond de numéro) -->
+                    <div class="px-5 py-4 flex items-center justify-between border-b" style="background-color: ${theme.bg}; border-color: ${theme.border}">
+                        <span class="font-sans font-bold text-xl truncate max-w-[150px]" style="color: ${theme.text}">${p}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-display text-3xl font-bold leading-none" style="color: ${theme.text}" id="total-${i}">0</span>
+                            <span class="text-[10px] uppercase tracking-widest font-sans font-bold" style="color: ${theme.text}; opacity: 0.8;">PR</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenu : Ligne de saisie horizontale -->
+                    <div class="p-3 bg-white/50">
+                        <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar snap-x pb-2 w-full px-1">
+                            ${FIELDS.map(f => {
+                                const isSanctuary = f.id === 's';
+                                return `
+                                <div class="snap-start shrink-0 ${isSanctuary ? 'w-[6.5rem]' : 'w-[4rem]'} bg-fara-card border border-fara-border rounded-xl p-2 flex flex-col items-center focus-within:border-fara-purple focus-within:shadow-sm transition-all">
+                                    <span class="text-[10px] font-bold ${isSanctuary ? 'text-fara-purple' : 'text-fara-inkMuted'} uppercase">${f.label}</span>
+                                    <input type="number" inputmode="numeric" 
+                                        class="w-full text-center font-display text-xl text-fara-ink bg-transparent outline-none mt-1"
+                                        placeholder="0"
+                                        value="${scores[p][f.id] || ''}"
+                                        onfocus="this.select()"
+                                        oninput="handleInput('${p}', '${f.id}', this.value, ${i})"
+                                    >
+                                </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function handleInput(playerName, field, value, playerIndex) {
+            scores[playerName][field] = parseInt(value) || 0;
+            
+            // MAJ Total Local
+            document.getElementById(`total-${playerIndex}`).innerText = getTotal(playerName);
+
+            // MAJ Stats
+            updateScoreboard();
+            updateChart();
+        }
+
+        function getTotal(playerName) {
+            let t = 0;
+            FIELDS.forEach(f => { t += scores[playerName][f.id]; });
+            return t;
+        }
+
+        // ==========================================
+        // 4. STATISTIQUES & GRAPHIQUE
+        // ==========================================
+        function updateScoreboard() {
+            const scoreboard = document.getElementById('scoreboard');
+            const totals = players.map((p, i) => ({
+                name: p,
+                total: getTotal(p),
+                theme: THEMES[i % THEMES.length]
+            }));
+            
+            totals.sort((a, b) => b.total - a.total);
+            
+            scoreboard.innerHTML = totals.map((t, index) => {
+                const isLeader = index === 0 && t.total > 0;
+                return `
+                <div class="px-4 py-3 flex items-center justify-between ${isLeader ? 'bg-fara-border/20' : ''} transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="font-display font-bold text-fara-inkMuted w-4">${index + 1}.</div>
+                        <span class="font-sans font-bold text-sm" style="color: ${t.theme.text}">${t.name}</span>
+                        ${isLeader ? '<span class="text-sm">🌟</span>' : ''}
+                    </div>
+                    <div class="font-display text-xl font-bold" style="color: ${isLeader ? t.theme.text : '#3A2E1E'}">
+                        ${t.total}
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('evolutionChart').getContext('2d');
+            if (chart) chart.destroy();
+            
+            const labels = FIELDS.map(f => f.label === 'Sanctuaires' ? 'S' : f.label);
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: players.map((p, i) => ({
+                        label: p,
+                        data: Array(9).fill(0),
+                        borderColor: THEMES[i % THEMES.length].text,
+                        backgroundColor: THEMES[i % THEMES.length].bg,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#FFF',
+                        pointBorderColor: THEMES[i % THEMES.length].text,
+                        pointBorderWidth: 2,
+                        tension: 0.3,
+                        fill: false
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: 'rgba(58, 46, 30, 0.05)' },
+                            ticks: { font: { family: 'Share Tech Mono' }, color: '#9C8A6E' },
+                            border: { display: false }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { font: { family: 'Nunito', weight: 'bold' }, color: '#6B5A42' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 252, 245, 0.95)',
+                            titleColor: '#3A2E1E',
+                            bodyColor: '#6B5A42',
+                            borderColor: '#EAD9B5',
+                            borderWidth: 1,
+                            titleFont: { family: 'Playfair Display', weight: 'bold' },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ' : ' + context.parsed.y + ' pts';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            players.forEach((p, i) => {
+                let cumulative = 0;
+                const dataArr = [];
+                FIELDS.forEach(f => {
+                    cumulative += scores[p][f.id];
+                    dataArr.push(cumulative);
+                });
+                chart.data.datasets[i].data = dataArr;
+            });
+            chart.update();
+        }
+
+        // ==========================================
+        // 5. VALIDATION ET HISTORIQUE
+        // ==========================================
+        function validateRound() {
+            // Sauvegarder les totaux
+            let roundTotals = {};
+            players.forEach(p => {
+                roundTotals[p] = getTotal(p);
+            });
+            historyData.push(roundTotals);
+            
+            // Préparer la nouvelle expédition
+            round++;
+            resetScores();
+            
+            // MAJ UI
+            renderInputs();
+            updateScoreboard();
+            updateChart();
+            updateHistory();
+
+            if (activeTab === 'input' && window.innerWidth < 1024) {
+                setActiveTab('stats');
+            }
+        }
+
+        function updateHistory() {
+            const historySection = document.getElementById('history-section');
+            const historyBody = document.getElementById('history-body');
+            const headerRow = document.getElementById('history-header-row');
+            
+            if (historyData.length === 0) {
+                historySection.classList.add('hidden');
+                return;
+            }
+            
+            historySection.classList.remove('hidden');
+            
+            headerRow.innerHTML = `
+                <th class="p-3 font-bold text-xs">Expéd.</th>
+            ` + players.map((p, i) => `
+                <th class="p-3 font-bold text-xs truncate max-w-[80px]" style="color: ${THEMES[i % THEMES.length].text}">
+                    ${p}
+                </th>
+            `).join('');
+
+            let rowsHtml = '';
+            for (let i = historyData.length - 1; i >= 0; i--) {
+                const rowScores = historyData[i];
+                let maxVal = -1;
+                players.forEach(p => { if (rowScores[p] > maxVal) maxVal = rowScores[p]; });
+
+                rowsHtml += `
+                    <tr class="border-b border-fara-border/50 hover:bg-white/40 transition-colors">
+                        <td class="p-3 font-mono text-fara-inkMuted text-xs">#${i + 1}</td>
+                        ${players.map(p => {
+                            const isWinner = rowScores[p] === maxVal && maxVal > 0;
+                            return `
+                            <td class="p-3 font-display font-bold text-base ${isWinner ? 'text-fara-gold' : 'text-fara-ink'}">
+                                ${rowScores[p]} ${isWinner ? '<span class="text-xs">🌟</span>' : ''}
+                            </td>
+                        `}).join('')}
+                    </tr>
+                `;
+            }
+            historyBody.innerHTML = rowsHtml;
+        }
+
+    </script>
+</body>
+</html>
