@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mölkky Tracker — Plage Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Nunito", "sans-serif"],
+                        display: ["Lilita One", "cursive"],
+                    },
+                    colors: {
+                        beach: {
+                            sand: '#F4E8D1',       
+                            sandDark: '#E0C9A3',   
+                            wood: '#8B5A2B',       
+                            woodLight: '#CD9A5B',  
+                            ocean: '#2B8897',      
+                            oceanLight: '#78C2C4', 
+                            coral: '#E87A5D',      
+                            ink: '#4A3728'         
+                        }
+                    },
+                    boxShadow: {
+                        'wood': '0 6px 0px #8B5A2B, 0 8px 10px rgba(0,0,0,0.1)',
+                        'panel': '0 10px 30px -5px rgba(43, 136, 151, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F4E8D1;
+            color: #4A3728;
+            -webkit-tap-highlight-color: transparent;
+            background-image: radial-gradient(#E0C9A3 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .wave-bg {
+            position: absolute; top: 0; left: 0; right: 0; height: 150px; z-index: 0;
+            background: linear-gradient(135deg, #78C2C4, #2B8897);
+            border-bottom-left-radius: 50% 20%;
+            border-bottom-right-radius: 50% 20%;
+        }
+
+        .btn-wood {
+            background: linear-gradient(180deg, #E6C28F, #CD9A5B);
+            border: 2px solid #8B5A2B;
+            border-radius: 16px;
+            box-shadow: 0 4px 0px #8B5A2B;
+            transition: all 0.1s;
+        }
+        .btn-wood:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0px #8B5A2B;
+            background: #CD9A5B;
+        }
+
+        .btn-miss {
+            background: linear-gradient(180deg, #FAD0C4, #E87A5D);
+            border: 2px solid #C44D33;
+            box-shadow: 0 4px 0px #C44D33;
+        }
+        .btn-miss:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0px #C44D33;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .tab-active { border-bottom-color: #2B8897; color: #2B8897; background: rgba(43, 136, 151, 0.05); }
+
+        .toggle-checkbox:checked { right: 0; border-color: #E87A5D; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #E87A5D; }
+
+        /* Animation EXPLOSION */
+        @keyframes explode {
+            0% { transform: scale(0.2); opacity: 0; filter: brightness(2); }
+            15% { transform: scale(1.3) rotate(-5deg); opacity: 1; filter: brightness(1.2); }
+            30% { transform: scale(0.9) rotate(5deg); }
+            45% { transform: scale(1.1) rotate(-3deg); }
+            60% { transform: scale(0.95) rotate(2deg); }
+            100% { transform: scale(1) rotate(0); opacity: 1; filter: brightness(1); }
+        }
+        .anim-explode {
+            animation: explode 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .bg-explosion {
+            background: radial-gradient(circle, rgba(232,122,93,0.95) 0%, rgba(74,55,40,0.98) 100%);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen relative pb-10">
+
+    <div class="wave-bg"></div>
+
+    <!-- ========================================== -->
+    <!-- ÉCRAN EXPLOSION (Pirate & Dépassement 50)  -->
+    <!-- ========================================== -->
+    <div id="explosion-screen" class="hidden fixed inset-0 z-[200] flex flex-col items-center justify-center bg-explosion backdrop-blur-md transition-opacity duration-300">
+        <div id="explosion-content" class="text-center w-full px-4">
+            <div id="explosion-icon" class="text-9xl mb-6 drop-shadow-[0_0_40px_rgba(255,255,255,0.6)]">💥</div>
+            <h2 id="explosion-title" class="font-display text-5xl md:text-7xl text-white mb-4 uppercase tracking-widest drop-shadow-lg">BOUM !</h2>
+            <div class="inline-block bg-white/10 backdrop-blur-sm border-2 border-white/20 px-6 py-4 rounded-3xl shadow-xl">
+                <p id="explosion-text" class="font-sans font-bold text-2xl md:text-3xl text-white leading-snug">
+                    Message
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ÉCRAN SETUP                                -->
+    <!-- ========================================== -->
+    <div id="setup-screen" class="relative z-10 flex flex-col justify-center px-4 py-12 min-h-screen max-w-md mx-auto">
+        <header class="text-center mb-6">
+            <div class="text-6xl mb-2 drop-shadow-md">🏖️🪵</div>
+            <h1 class="font-display text-5xl text-white tracking-wide drop-shadow-md mb-1">MÖLKKY</h1>
+            <p class="font-sans text-xs font-bold tracking-widest text-beach-sand uppercase drop-shadow-sm">Édition Plage</p>
+        </header>
+
+        <div class="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-panel border-2 border-white">
+            <h2 class="font-display text-xl text-beach-ocean mb-4 text-center">QUI JOUE ?</h2>
+            
+            <div id="player-list" class="space-y-3 mb-5">
+                <!-- Joueurs injectés ici -->
+            </div>
+            
+            <button onclick="addPlayer()" class="w-full py-3 mb-6 bg-beach-sand/50 border-2 border-dashed border-beach-woodLight text-beach-wood rounded-xl font-bold hover:bg-beach-sand transition-colors">
+                + Ajouter un lanceur
+            </button>
+
+            <!-- VARIANTE PIRATE TOGGLE -->
+            <div class="bg-beach-oceanLight/10 border border-beach-oceanLight/30 rounded-2xl p-4 mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="relative inline-block w-12 align-middle select-none shrink-0">
+                        <input type="checkbox" id="pirate-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-[#E0C9A3] appearance-none cursor-pointer transition-transform duration-200 z-10"/>
+                        <label for="pirate-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-[#E0C9A3] cursor-pointer transition-colors duration-200"></label>
+                    </div>
+                    <div>
+                        <p class="font-sans text-sm text-beach-ink font-bold flex items-center gap-1">
+                            Variante Pirate 🏴‍☠️
+                        </p>
+                        <p class="font-sans text-xs text-beach-woodLight mt-0.5 leading-tight">
+                            Atteindre le score exact d'un adversaire le fait couler à 0 (ou à 25 s'il avait plus de 25 pts) !
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="w-full py-4 text-white font-display text-2xl rounded-xl btn-wood !bg-beach-ocean !border-[#1C5D68] !shadow-[0_4px_0px_#1C5D68] hover:brightness-110 tracking-widest uppercase">
+                Commencer
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ÉCRAN JEU                                  -->
+    <!-- ========================================== -->
+    <div id="game-screen" class="hidden relative z-10 min-h-screen flex-col">
+        
+        <!-- HEADER -->
+        <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+            <div class="px-4 py-3 flex items-center justify-between">
+                <button onclick="goBack()" class="font-bold text-sm text-beach-woodLight hover:text-beach-wood transition-colors">
+                    ‹ Abandonner
+                </button>
+                <div class="flex items-center gap-2">
+                    <span class="text-xl" id="rule-indicator">🪵</span>
+                    <h1 class="font-display text-xl text-beach-ocean tracking-wider">MÖLKKY</h1>
+                </div>
+                <button onclick="undo()" id="btn-undo" class="font-bold text-sm text-beach-coral opacity-50 cursor-not-allowed transition-opacity bg-beach-coral/10 px-3 py-1 rounded-lg">
+                    ↺ Oups
+                </button>
+            </div>
+
+            <!-- TABS MOBILE -->
+            <div class="flex border-t border-beach-sand lg:hidden">
+                <button onclick="setActiveTab('input')" id="tab-input" class="flex-1 py-3 font-bold text-xs tracking-widest tab-active">
+                    LANCER
+                </button>
+                <button onclick="setActiveTab('stats')" id="tab-stats" class="flex-1 py-3 font-bold text-xs tracking-widest border-b-2 border-transparent text-beach-woodLight">
+                    SCORES & STATS
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:grid lg:grid-cols-12 gap-8">
+            
+            <!-- COLONNE GAUCHE : SAISIE -->
+            <section id="section-input" class="lg:col-span-6 flex flex-col gap-4">
+                
+                <!-- CARTE JOUEUR ACTIF -->
+                <div class="bg-white rounded-[24px] p-5 shadow-panel border-2 border-white relative overflow-hidden" id="active-player-card">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-beach-oceanLight/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                    
+                    <div class="flex justify-between items-start mb-2 relative z-10">
+                        <div>
+                            <p class="text-[10px] font-bold text-beach-ocean uppercase tracking-widest">À ton tour</p>
+                            <h2 class="font-display text-4xl text-beach-ink" id="active-name">Joueur</h2>
+                        </div>
+                        <div class="flex gap-1 bg-beach-sand/50 p-2 rounded-xl border border-beach-sandDark" id="active-misses">
+                            <!-- Rempli par JS -->
+                        </div>
+                    </div>
+
+                    <div class="mt-4 relative z-10">
+                        <div class="flex justify-between items-end mb-1">
+                            <span class="font-display text-5xl leading-none text-beach-ocean" id="active-score">0</span>
+                            <span class="font-bold text-beach-woodLight text-sm mb-1">Cible : 50</span>
+                        </div>
+                        <div class="w-full h-4 bg-beach-sand rounded-full overflow-hidden border border-beach-sandDark/50 relative">
+                            <div id="active-progress" class="h-full bg-beach-ocean transition-all duration-500 rounded-full w-0"></div>
+                            <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white/50"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAVÉ NUMÉRIQUE -->
+                <div class="bg-white rounded-[24px] p-4 shadow-sm border-2 border-white">
+                    <p class="text-center font-bold text-xs text-beach-woodLight uppercase tracking-widest mb-3">
+                        Combien de points marqués ?
+                    </p>
+                    <div class="grid grid-cols-3 gap-3 mb-3">
+                        <button onclick="scoreTurn(1)" class="btn-wood py-3 font-display text-2xl text-beach-ink">1</button>
+                        <button onclick="scoreTurn(2)" class="btn-wood py-3 font-display text-2xl text-beach-ink">2</button>
+                        <button onclick="scoreTurn(3)" class="btn-wood py-3 font-display text-2xl text-beach-ink">3</button>
+                        <button onclick="scoreTurn(4)" class="btn-wood py-3 font-display text-2xl text-beach-ink">4</button>
+                        <button onclick="scoreTurn(5)" class="btn-wood py-3 font-display text-2xl text-beach-ink">5</button>
+                        <button onclick="scoreTurn(6)" class="btn-wood py-3 font-display text-2xl text-beach-ink">6</button>
+                        <button onclick="scoreTurn(7)" class="btn-wood py-3 font-display text-2xl text-beach-ink">7</button>
+                        <button onclick="scoreTurn(8)" class="btn-wood py-3 font-display text-2xl text-beach-ink">8</button>
+                        <button onclick="scoreTurn(9)" class="btn-wood py-3 font-display text-2xl text-beach-ink">9</button>
+                        <button onclick="scoreTurn(10)" class="btn-wood py-3 font-display text-2xl text-beach-ink">10</button>
+                        <button onclick="scoreTurn(11)" class="btn-wood py-3 font-display text-2xl text-beach-ink">11</button>
+                        <button onclick="scoreTurn(12)" class="btn-wood py-3 font-display text-2xl text-beach-ink">12</button>
+                    </div>
+                    <button onclick="scoreTurn(0)" class="w-full btn-wood btn-miss py-3 flex items-center justify-center gap-2 font-display text-2xl text-white tracking-wide">
+                        <span>❌</span> LOUPÉ (0)
+                    </button>
+                </div>
+
+                <!-- FILE D'ATTENTE -->
+                <div class="px-2" id="next-players-queue"></div>
+            </section>
+
+            <!-- COLONNE DROITE : STATS -->
+            <section id="section-stats" class="lg:col-span-6 flex flex-col gap-6 hidden lg:flex">
+                <div class="bg-white rounded-[24px] overflow-hidden shadow-panel border-2 border-white">
+                    <div class="bg-beach-ocean px-5 py-3 flex justify-between items-center">
+                        <span class="font-display text-white text-lg tracking-wider">CLASSEMENT</span>
+                    </div>
+                    <div id="leaderboard" class="divide-y divide-beach-sand p-2"></div>
+                </div>
+
+                <div class="bg-white rounded-[24px] p-5 shadow-panel border-2 border-white">
+                    <div class="font-bold text-xs text-beach-woodLight tracking-widest uppercase mb-4 text-center">
+                        Timeline de la partie
+                    </div>
+                    <div class="h-[250px] w-full">
+                        <canvas id="raceChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL FIN DE PARTIE -->
+    <div id="victory-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-beach-ink/80 backdrop-blur-sm">
+        <div class="bg-white rounded-[32px] p-8 max-w-sm w-full text-center relative overflow-hidden border-4 border-beach-ocean">
+            <div class="text-6xl mb-4 animate-bounce">🏆</div>
+            <h2 class="font-display text-4xl text-beach-ocean mb-1">VICTOIRE !</h2>
+            <p class="font-bold text-sm text-beach-woodLight mb-6">Pile poil 50 points.</p>
+            
+            <div class="bg-beach-sand/50 p-6 rounded-2xl mb-8 border border-beach-sandDark">
+                <div class="text-[10px] font-bold text-beach-ink uppercase tracking-widest mb-2">Le Grand Vainqueur</div>
+                <div id="winner-name" class="font-display text-3xl text-beach-coral mb-2 break-words">Nom</div>
+                <div class="bg-white px-4 py-2 rounded-xl inline-block font-display text-2xl text-beach-ocean shadow-sm">
+                    50 <span class="text-sm">pts</span>
+                </div>
+            </div>
+            
+            <button onclick="location.reload()" class="w-full py-4 bg-beach-ocean text-white font-display text-xl rounded-xl hover:bg-[#1C5D68] transition-colors tracking-widest shadow-md">
+                Nouvelle Partie
+            </button>
+        </div>
+    </div>
+
+    <!-- SCRIPTS JS -->
+    <script>
+        let players = []; 
+        let currentIndex = 0;
+        let gameHistory = []; 
+        let chartInstance = null;
+        let isPirateMode = false;
+
+        const COLORS = ['#E87A5D', '#2B8897', '#CD9A5B', '#8B5A2B', '#78C2C4', '#4A3728'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSetup();
+        });
+
+        function initSetup() {
+            players = [
+                { id: 1, name: '' },
+                { id: 2, name: '' }
+            ];
+            renderSetup();
+        }
+
+        function renderSetup() {
+            const list = document.getElementById('player-list');
+            list.innerHTML = players.map((p, i) => {
+                const placeholder = i === 0 ? 'Alice' : (i === 1 ? 'Bob' : `Joueur ${i+1}`);
+                return `
+                <div class="flex items-center gap-3 bg-beach-sand/30 p-2 rounded-xl border border-beach-sandDark focus-within:border-beach-ocean transition-colors">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-display text-white text-sm" style="background-color: ${COLORS[i % COLORS.length]}">
+                        ${i+1}
+                    </div>
+                    <input
+                        class="flex-1 bg-transparent border-none text-beach-ink font-bold text-base outline-none placeholder-beach-woodLight/50"
+                        value="${p.name}"
+                        placeholder="${placeholder}"
+                        onchange="players[${i}].name = this.value.trim()"
+                        maxlength="15"
+                    />
+                    ${players.length > 2 ? `
+                        <button onclick="removePlayer(${i})" class="w-8 h-8 flex items-center justify-center text-beach-woodLight hover:text-beach-coral text-xl font-bold">×</button>
+                    ` : ''}
+                </div>
+                `;
+            }).join('');
+        }
+
+        function addPlayer() {
+            if(players.length >= 6) return;
+            players.push({ id: Date.now(), name: '' });
+            renderSetup();
+        }
+
+        function removePlayer(idx) {
+            players.splice(idx, 1);
+            renderSetup();
+        }
+
+        function startGame() {
+            isPirateMode = document.getElementById('pirate-toggle').checked;
+
+            if (isPirateMode) {
+                document.getElementById('rule-indicator').innerText = '🏴‍☠️';
+            }
+
+            players = players.map((p, i) => {
+                const defaultName = i === 0 ? 'Alice' : (i === 1 ? 'Bob' : `Joueur ${i+1}`);
+                return {
+                    ...p,
+                    name: p.name || defaultName,
+                    score: 0,
+                    misses: 0,
+                    eliminated: false,
+                    history: [0]
+                };
+            });
+
+            currentIndex = 0;
+            gameHistory = [];
+            
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('flex');
+            
+            updateUI();
+            initChart();
+        }
+
+        function goBack() {
+            if(confirm("Quitter la partie en cours ?")) {
+                location.reload();
+            }
+        }
+
+        function saveState() {
+            const state = {
+                players: JSON.parse(JSON.stringify(players)),
+                currentIndex: currentIndex
+            };
+            gameHistory.push(state);
+            document.getElementById('btn-undo').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btn-undo').classList.add('hover:bg-beach-coral/20');
+        }
+
+        function undo() {
+            if(gameHistory.length === 0) return;
+            const lastState = gameHistory.pop();
+            players = lastState.players;
+            currentIndex = lastState.currentIndex;
+            
+            if(gameHistory.length === 0) {
+                const btn = document.getElementById('btn-undo');
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.classList.remove('hover:bg-beach-coral/20');
+            }
+            
+            updateUI();
+            updateChart();
+        }
+
+        // ==========================================
+        // GESTION DE L'EXPLOSION PLEIN ECRAN
+        // ==========================================
+        function triggerExplosion(icon, title, text, callback) {
+            const screen = document.getElementById('explosion-screen');
+            const content = document.getElementById('explosion-content');
+            
+            document.getElementById('explosion-icon').innerText = icon;
+            document.getElementById('explosion-title').innerHTML = title;
+            document.getElementById('explosion-text').innerHTML = text;
+            
+            screen.classList.remove('hidden');
+            content.classList.remove('anim-explode');
+            void content.offsetWidth; 
+            content.classList.add('anim-explode');
+            
+            setTimeout(() => {
+                screen.classList.add('opacity-0');
+                setTimeout(() => {
+                    screen.classList.add('hidden');
+                    screen.classList.remove('opacity-0');
+                    if(callback) callback();
+                }, 300);
+            }, 3000);
+        }
+
+        // ==========================================
+        // LOGIQUE CENTRALE DE SCORE
+        // ==========================================
+        function scoreTurn(points) {
+            saveState();
+            let p = players[currentIndex];
+            let busted = false;
+            let torpedoedPlayers = [];
+            let targetNewScore = 0;
+
+            if (points === 0) {
+                p.misses += 1;
+                if (p.misses >= 3) {
+                    p.eliminated = true;
+                    p.score = 0;
+                }
+            } else {
+                p.misses = 0;
+                p.score += points;
+                
+                // Dépassement 50
+                if (p.score > 50) {
+                    p.score = 25; 
+                    busted = true;
+                } 
+                // Pirate : On vérifie si son score correspond à qqn d'autre
+                else if (isPirateMode && p.score < 50) {
+                    targetNewScore = (p.score > 25) ? 25 : 0;
+                    players.forEach(other => {
+                        if (other.id !== p.id && !other.eliminated && other.score === p.score) {
+                            other.score = targetNewScore;
+                            torpedoedPlayers.push(other.name);
+                        }
+                    });
+                }
+            }
+
+            // === SYNCHRO PARFAITE DE L'HISTORIQUE (Zéro delta) ===
+            players.forEach(pl => {
+                pl.history.push(pl.score);
+            });
+
+            // Victoire ou Game Over ?
+            if (p.score === 50) {
+                handleWin(p);
+                return;
+            }
+            if (checkGameEnd()) return;
+
+            // ANIMATIONS (Explosion ou passage normal)
+            if (busted && torpedoedPlayers.length > 0) {
+                const names = torpedoedPlayers.join(' et ');
+                triggerExplosion('💥', 'DOUBLE BOUM !', `${p.name} redescend à 25<br>et coule ${names} à ${targetNewScore} !`, advancePlayer);
+            } 
+            else if (busted) {
+                triggerExplosion('💥', 'TROP FORT !', `${p.name} dépasse 50 et redescend à 25 !`, advancePlayer);
+            } 
+            else if (torpedoedPlayers.length > 0) {
+                const names = torpedoedPlayers.join(' et ');
+                triggerExplosion('🏴‍☠️', 'À L\'ABORDAGE !', `${p.name} coule ${names} à ${targetNewScore} !`, advancePlayer);
+            } 
+            else {
+                advancePlayer();
+            }
+        }
+
+        function checkGameEnd() {
+            const alive = players.filter(pl => !pl.eliminated);
+            if(alive.length === 0) {
+                alert("Game Over ! Tous les joueurs sont éliminés.");
+                location.reload();
+                return true;
+            } else if (alive.length === 1 && players.length > 1) {
+                handleWin(alive[0]);
+                return true;
+            }
+            return false;
+        }
+
+        function advancePlayer() {
+            do {
+                currentIndex++;
+                if (currentIndex >= players.length) {
+                    currentIndex = 0;
+                }
+            } while (players[currentIndex].eliminated);
+
+            updateUI();
+            updateChart();
+        }
+
+        function handleWin(player) {
+            updateUI(); 
+            updateChart();
+            document.getElementById('winner-name').innerText = player.name;
+            document.getElementById('victory-modal').classList.remove('hidden');
+        }
+
+        function updateUI() {
+            const p = players[currentIndex];
+            
+            document.getElementById('active-name').innerText = p.name;
+            document.getElementById('active-score').innerText = p.score;
+            
+            const progressEl = document.getElementById('active-progress');
+            progressEl.style.width = `${(p.score / 50) * 100}%`;
+            if(p.score >= 40) progressEl.className = "h-full transition-all duration-500 rounded-full bg-beach-coral";
+            else progressEl.className = "h-full transition-all duration-500 rounded-full bg-beach-ocean";
+
+            let missesHtml = '';
+            for(let i=1; i<=3; i++) {
+                if(i <= p.misses) {
+                    missesHtml += `<div class="w-5 h-5 rounded-full bg-beach-coral flex items-center justify-center text-[10px] text-white shadow-inner">❌</div>`;
+                } else {
+                    missesHtml += `<div class="w-5 h-5 rounded-full bg-white border-2 border-beach-sandDark"></div>`;
+                }
+            }
+            document.getElementById('active-misses').innerHTML = missesHtml;
+
+            const queueEl = document.getElementById('next-players-queue');
+            let queueHtml = `<p class="font-bold text-[10px] text-beach-woodLight uppercase tracking-widest mb-2 px-1">En attente</p>`;
+            
+            let cIdx = currentIndex;
+            for(let i=0; i<players.length - 1; i++) {
+                cIdx = (cIdx + 1) % players.length;
+                const nextP = players[cIdx];
+                if(nextP.eliminated) continue;
+                
+                queueHtml += `
+                <div class="flex items-center justify-between py-2 border-b border-beach-sandDark/30 last:border-0 opacity-60">
+                    <span class="font-bold text-sm text-beach-ink">${nextP.name}</span>
+                    <span class="font-display text-lg text-beach-ocean">${nextP.score}</span>
+                </div>`;
+            }
+            queueEl.innerHTML = queueHtml;
+
+            const sortedPlayers = [...players].sort((a,b) => {
+                if(a.eliminated && !b.eliminated) return 1;
+                if(!a.eliminated && b.eliminated) return -1;
+                return b.score - a.score;
+            });
+            
+            document.getElementById('leaderboard').innerHTML = sortedPlayers.map((pl, i) => `
+                <div class="flex items-center justify-between p-3 ${pl.eliminated ? 'opacity-40 grayscale' : ''}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center font-display text-white text-xs" style="background-color: ${COLORS[players.indexOf(pl) % COLORS.length]}">
+                            ${i+1}
+                        </div>
+                        <span class="font-bold text-beach-ink">${pl.name}</span>
+                        ${pl.eliminated ? '<span class="text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded font-bold uppercase">Éliminé</span>' : ''}
+                    </div>
+                    <span class="font-display text-2xl text-beach-ocean">${pl.eliminated ? '☠️' : pl.score}</span>
+                </div>
+            `).join('');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('raceChart').getContext('2d');
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Départ'], 
+                    datasets: players.map((p, i) => ({
+                        label: p.name,
+                        data: p.history,
+                        borderColor: COLORS[i % COLORS.length],
+                        backgroundColor: COLORS[i % COLORS.length] + '20',
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#FFF',
+                        pointBorderColor: COLORS[i % COLORS.length],
+                        pointBorderWidth: 2,
+                        tension: 0.2,
+                        fill: false
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            min: 0, max: 50,
+                            grid: { color: 'rgba(139, 90, 43, 0.1)', borderDash: [5, 5] },
+                            ticks: { font: { family: 'Nunito', weight: 'bold' }, color: '#8B5A2B', stepSize: 10 }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { display: false } 
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ' : ' + context.parsed.y + ' pts';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if(!chartInstance) return;
+            
+            const maxTurns = Math.max(...players.map(p => p.history.length));
+            chartInstance.data.labels = Array.from({length: maxTurns}, (_, i) => i === 0 ? 'Départ' : `L${i}`);
+            
+            players.forEach((p, i) => {
+                chartInstance.data.datasets[i].data = p.history;
+            });
+            chartInstance.update();
+        }
+
+        function setActiveTab(tab) {
+            const sectionInput = document.getElementById('section-input');
+            const sectionStats = document.getElementById('section-stats');
+            const tabInput = document.getElementById('tab-input');
+            const tabStats = document.getElementById('tab-stats');
+
+            if (tab === 'input') {
+                sectionInput.classList.remove('hidden');
+                sectionInput.classList.add('flex');
+                sectionStats.classList.add('hidden');
+                sectionStats.classList.remove('flex');
+                
+                tabInput.classList.add('tab-active');
+                tabInput.classList.remove('border-transparent', 'text-beach-woodLight');
+                tabStats.classList.remove('tab-active');
+                tabStats.classList.add('border-transparent', 'text-beach-woodLight');
+            } else {
+                sectionInput.classList.add('hidden');
+                sectionInput.classList.remove('flex');
+                sectionStats.classList.remove('hidden', 'lg:flex');
+                sectionStats.classList.add('flex');
+                
+                tabStats.classList.add('tab-active');
+                tabStats.classList.remove('border-transparent', 'text-beach-woodLight');
+                tabInput.classList.remove('tab-active');
+                tabInput.classList.add('border-transparent', 'text-beach-woodLight');
+                
+                if (chartInstance) setTimeout(() => chartInstance.update(), 100);
+            }
+        }
+    </script>
+</body>
+</html>
