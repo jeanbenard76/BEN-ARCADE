@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BELOTE — BEN'ARCADE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        serif: ["Playfair Display", "serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    colors: {
+                        velvet: { dark: '#2D0A0F', base: '#701A26', light: '#A12536' },
+                        casino: { gold: '#D4AF37', goldLight: '#F3E5AB', black: '#1A1A1A', white: '#FAFAFA' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FAFAFA; -webkit-tap-highlight-color: transparent; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pattern-bg { background-image: radial-gradient(#ffffff20 1px, transparent 1px); background-size: 16px 16px; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="text-casino-black font-sans antialiased pb-24 lg:pb-8">
+
+    <!-- SETUP SCREEN -->
+    <div id="setup-screen" class="min-h-screen bg-velvet-dark flex items-center justify-center p-4">
+        <div class="bg-casino-white rounded-2xl shadow-2xl p-8 max-w-md w-full border-t-4 border-casino-gold relative overflow-hidden">
+            <div class="text-center mb-8">
+                <div class="flex justify-center gap-2 text-3xl mb-2">
+                    <span class="text-casino-black">♠</span>
+                    <span class="text-velvet-light">♥</span>
+                    <span class="text-casino-black">♣</span>
+                    <span class="text-velvet-light">♦</span>
+                </div>
+                <h1 class="font-serif text-4xl font-bold text-velvet-dark">BELOTE</h1>
+                <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-mono">Classique • Règles FFB</p>
+            </div>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Équipe 1</label>
+                    <input type="text" id="team1-name" placeholder="Nous" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 font-semibold focus:border-velvet-base outline-none transition-colors text-center text-lg placeholder-gray-300">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Équipe 2</label>
+                    <input type="text" id="team2-name" placeholder="Eux" class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-3 font-semibold focus:border-velvet-base outline-none transition-colors text-center text-lg placeholder-gray-300">
+                </div>
+            </div>
+            
+            <button onclick="startGame()" class="w-full mt-8 py-4 bg-velvet-base text-casino-gold font-serif text-xl font-bold rounded-xl shadow-lg hover:bg-velvet-light transition-all">
+                Distribuer
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="game-screen" class="hidden">
+        
+        <!-- HEADER -->
+        <header class="bg-velvet-dark text-white sticky top-0 z-40 shadow-lg border-b-2 border-casino-gold">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between p-3 border-b border-white/10">
+                    <a href="index.html" class="p-2 hover:bg-white/10 rounded-full transition-colors text-casino-gold">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                    </a>
+                    <h1 class="font-serif text-xl text-casino-gold text-center flex-1 tracking-wider">BELOTE</h1>
+                    <div class="w-10"></div>
+                </div>
+                <div class="bg-velvet-base py-1.5 px-2 overflow-x-auto hide-scrollbar">
+                    <div id="card-values-display" class="flex gap-4 min-w-max justify-center text-[10px] sm:text-[11px] font-mono tracking-tight text-casino-goldLight"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MOBILE TABS -->
+        <div class="lg:hidden flex bg-white border-b border-gray-200 sticky top-[85px] sm:top-[88px] z-30 shadow-sm">
+            <button onclick="switchTab('input')" id="tab-input" class="flex-1 py-3 text-xs font-bold tracking-widest uppercase transition-all border-b-2 border-velvet-base text-velvet-base bg-red-50/50">Saisie</button>
+            <button onclick="switchTab('stats')" id="tab-stats" class="flex-1 py-3 text-xs font-bold tracking-widest uppercase transition-all border-b-2 border-transparent text-gray-400">Scores & Graph</button>
+        </div>
+
+        <main class="max-w-7xl mx-auto p-4 lg:py-8 lg:px-6">
+            
+            <!-- Scoreboard Global -->
+            <div class="bg-velvet-dark pattern-bg rounded-2xl shadow-xl border border-velvet-light p-4 flex justify-between items-center mb-6 text-white relative overflow-hidden">
+                <div class="text-center flex-1 z-10 overflow-hidden px-2">
+                    <h3 id="score-name-1" class="font-bold text-casino-gold uppercase tracking-wider text-xs lg:text-sm mb-1 truncate">Nous</h3>
+                    <div id="score-total-1" class="font-mono text-4xl lg:text-5xl font-bold">0</div>
+                </div>
+                <div class="text-center px-4 z-10 flex flex-col items-center justify-center shrink-0">
+                    <div class="w-[1px] h-6 bg-casino-gold/30 mb-2"></div>
+                    <div id="round-counter" class="font-mono text-[10px] bg-casino-gold text-velvet-dark px-2 py-0.5 rounded font-bold uppercase tracking-widest">Manche 1</div>
+                    <div id="litige-indicator" class="hidden mt-2 font-mono text-[9px] bg-white text-velvet-dark px-2 py-0.5 rounded font-bold uppercase tracking-widest animate-pulse">
+                        Litige: +81
+                    </div>
+                    <div class="w-[1px] h-6 bg-casino-gold/30 mt-2"></div>
+                </div>
+                <div class="text-center flex-1 z-10 overflow-hidden px-2">
+                    <h3 id="score-name-2" class="font-bold text-casino-gold uppercase tracking-wider text-xs lg:text-sm mb-1 truncate">Eux</h3>
+                    <div id="score-total-2" class="font-mono text-4xl lg:text-5xl font-bold">0</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- COLONNE GAUCHE : SAISIE -->
+                <section id="section-input" class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+                        <div class="bg-gray-50 border-b border-gray-200 p-3 font-serif text-sm font-bold text-gray-600 uppercase tracking-widest text-center">
+                            Le Contrat
+                        </div>
+                        <div class="p-4 sm:p-6 space-y-5">
+                            
+                            <!-- 1. Preneur -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">1. Qui prend ?</label>
+                                <div class="flex bg-gray-100 p-1.5 rounded-xl gap-1">
+                                    <button id="btn-preneur-1" onclick="setPreneur(1)" class="flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow border border-gray-200 text-velvet-base truncate px-2 transition-all"></button>
+                                    <button id="btn-preneur-2" onclick="setPreneur(2)" class="flex-1 py-3 rounded-lg font-bold text-sm text-gray-400 hover:bg-gray-200 transition-all truncate px-2"></button>
+                                </div>
+                            </div>
+
+                            <!-- 2. Atout -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">2. À l'atout</label>
+                                <div class="relative">
+                                    <select id="atout" onchange="updateAtoutBase()" class="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3.5 font-bold appearance-none outline-none focus:border-velvet-base shadow-sm">
+                                        <option value="pique">♠ Pique</option> 
+                                        <option value="coeur">♥ Cœur</option>
+                                        <option value="carreau">♦ Carreau</option> 
+                                        <option value="trefle">♣ Trèfle</option>
+                                        <option value="sa" class="bg-gray-100">Sans Atout (SA)</option> 
+                                        <option value="ta" class="bg-gray-100">Tout Atout (TA)</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">▼</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+                        <div class="p-4 sm:p-6 space-y-6">
+                            
+                            <!-- Points Faits -->
+                            <div class="w-full">
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">3. Points réalisés (Preneur)</label>
+                                    <span id="base-indicator" class="text-[10px] font-mono text-white bg-velvet-base px-2 py-0.5 rounded shadow">Total dispo: 162</span>
+                                </div>
+                                <div class="flex items-center gap-2 w-full">
+                                    <button onclick="adjustPoints(-10)" class="w-14 shrink-0 h-14 bg-gray-100 text-gray-600 rounded-xl font-mono text-2xl hover:bg-gray-200 active:bg-gray-300 transition-colors">-</button>
+                                    <input type="number" id="points-faits" placeholder="0" inputmode="numeric" pattern="[0-9]*" oninput="updatePreview()" class="flex-1 min-w-0 h-14 text-center font-mono text-4xl font-bold bg-white border-2 border-gray-200 rounded-xl outline-none focus:border-velvet-base text-velvet-dark placeholder-gray-200">
+                                    <button onclick="adjustPoints(10)" class="w-14 shrink-0 h-14 bg-gray-100 text-gray-600 rounded-xl font-mono text-2xl hover:bg-gray-200 active:bg-gray-300 transition-colors">+</button>
+                                </div>
+                                <div class="flex gap-2 text-xs mt-3">
+                                    <button onclick="setPoints(0)" class="flex-1 py-2 bg-red-50 text-red-600 rounded-lg font-bold hover:bg-red-100 active:scale-95 transition-all">Chute (0)</button>
+                                    <button id="btn-capot" onclick="setPoints(252)" class="flex-1 py-2 bg-green-50 text-green-700 rounded-lg font-bold hover:bg-green-100 active:scale-95 transition-all">Capot (252)</button>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-100">
+
+                            <!-- Belote Dynamique -->
+                            <div>
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">4. Belotes (+20 / Unité)</label>
+                                </div>
+                                <div id="belote-ui">
+                                    <!-- Injecté via JS -->
+                                </div>
+                            </div>
+                            
+                            <!-- Result Preview -->
+                            <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 flex justify-between items-center mt-2">
+                                <div class="flex gap-4 font-mono text-sm font-bold flex-1 justify-center px-2 truncate">
+                                    <span id="preview-t1" class="text-gray-400 truncate"></span>
+                                    <span id="preview-t2" class="text-gray-400 truncate"></span>
+                                </div>
+                                <span id="preview-status" class="text-[10px] font-bold px-2 py-1 rounded bg-gray-200 text-gray-600 shrink-0 tracking-wider">EN ATTENTE</span>
+                            </div>
+                        </div>
+                        
+                        <button onclick="calculateAndSave()" class="w-full py-5 bg-casino-black text-casino-gold font-serif text-xl font-bold hover:bg-gray-900 transition-all flex justify-center gap-2 items-center shadow-lg">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>
+                            VALIDER LA MANCHE
+                        </button>
+                    </div>
+                </section>
+
+                <!-- COLONNE DROITE : STATS & HISTORIQUE -->
+                <section id="section-stats" class="hidden lg:flex flex-col gap-6">
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4">
+                        <div class="font-serif text-sm font-bold text-gray-600 uppercase tracking-widest mb-4">Évolution</div>
+                        <div class="h-48 w-full"><canvas id="scoreChart"></canvas></div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 flex-1 overflow-hidden flex flex-col">
+                        <div class="bg-gray-50 border-b border-gray-200 p-3 font-serif text-sm font-bold text-gray-600 uppercase tracking-widest flex justify-between items-center">
+                            <span>Historique</span>
+                            <button onclick="undo()" class="text-[10px] bg-white border border-gray-300 px-2 py-1 rounded text-red-600 hover:bg-red-50 transition-colors">⏪ Annuler</button>
+                        </div>
+                        <div class="overflow-y-auto flex-1 p-0 hide-scrollbar" style="max-height: 400px;">
+                            <table class="w-full text-sm text-center">
+                                <thead class="bg-white sticky top-0 border-b border-gray-200 text-[10px] text-gray-400 uppercase tracking-wider font-bold z-10 shadow-sm">
+                                    <tr>
+                                        <th class="py-3 px-2 font-normal">Contrat</th>
+                                        <th class="py-3 px-2" id="hist-name-1">E1</th>
+                                        <th class="py-3 px-2" id="hist-name-2">E2</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-body" class="divide-y divide-gray-100 font-mono">
+                                    <tr><td colspan="3" class="py-8 text-gray-400 italic text-xs font-sans">La partie commence...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL VICTOIRE -->
+    <div id="modal-victory" class="hidden fixed inset-0 z-[100] bg-velvet-dark/95 backdrop-blur flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl border-4 border-casino-gold">
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="font-serif text-3xl font-bold text-velvet-dark mb-2 uppercase tracking-widest">Victoire !</h2>
+            <p class="text-gray-500 font-bold mb-6 text-sm uppercase tracking-wider">Partie terminée (1000 pts atteints)</p>
+            <div class="bg-gray-50 rounded-xl p-6 mb-8 border border-gray-200">
+                <div class="text-xl font-bold text-casino-gold mb-1" id="victory-winner-name">Equipe X</div>
+                <div class="font-mono text-5xl font-black text-velvet-base" id="victory-winner-score">1020</div>
+            </div>
+            <button onclick="restartGame()" class="w-full py-4 bg-velvet-base text-casino-gold font-serif text-lg font-bold rounded-xl shadow-lg hover:bg-velvet-light transition-all uppercase tracking-widest">
+                Nouvelle Partie
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- ETAT GLOBAL ---
+        let teams = { 1: "Nous", 2: "Eux" };
+        let scores = { 1: 0, 2: 0 };
+        let history = [];
+        
+        let preneur = 1;
+        let beloteCount1 = 0; 
+        let beloteCount2 = 0;
+        let pendingLitige = 0; 
+        let chart;
+
+        // --- INIT ---
+        function startGame() {
+            teams[1] = document.getElementById('team1-name').value.trim() || "Nous";
+            teams[2] = document.getElementById('team2-name').value.trim() || "Eux";
+            
+            document.getElementById('score-name-1').innerText = teams[1];
+            document.getElementById('score-name-2').innerText = teams[2];
+            document.getElementById('btn-preneur-1').innerText = teams[1];
+            document.getElementById('btn-preneur-2').innerText = teams[2];
+            document.getElementById('hist-name-1').innerText = teams[1].substring(0,4).toUpperCase();
+            document.getElementById('hist-name-2').innerText = teams[2].substring(0,4).toUpperCase();
+            
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            initChart();
+            updateAtoutBase();
+        }
+
+        function restartGame() {
+            scores = { 1: 0, 2: 0 };
+            history = [];
+            pendingLitige = 0;
+            document.getElementById('modal-victory').classList.add('hidden');
+            resetForm();
+            updateUI();
+            chart.data.labels = ['Début']; chart.data.datasets[0].data = [0]; chart.data.datasets[1].data = [0]; chart.update();
+        }
+
+        function switchTab(tab) {
+            const inputSec = document.getElementById('section-input');
+            const statsSec = document.getElementById('section-stats');
+            const tInput = document.getElementById('tab-input');
+            const tStats = document.getElementById('tab-stats');
+
+            if (tab === 'input') {
+                inputSec.classList.remove('hidden'); statsSec.classList.add('hidden', 'lg:flex');
+                tInput.className = "flex-1 py-3 text-xs font-bold tracking-widest uppercase border-b-2 border-velvet-base text-velvet-base bg-red-50/50";
+                tStats.className = "flex-1 py-3 text-xs font-bold tracking-widest uppercase border-b-2 border-transparent text-gray-400";
+            } else {
+                inputSec.classList.add('hidden'); statsSec.classList.remove('hidden'); statsSec.classList.add('flex');
+                tStats.className = "flex-1 py-3 text-xs font-bold tracking-widest uppercase border-b-2 border-velvet-base text-velvet-base bg-red-50/50";
+                tInput.className = "flex-1 py-3 text-xs font-bold tracking-widest uppercase border-b-2 border-transparent text-gray-400";
+                if(chart) chart.update();
+            }
+        }
+
+        // --- FORMULAIRE PRINCIPAL ---
+        function setPreneur(id) {
+            preneur = id;
+            document.getElementById('btn-preneur-1').className = id === 1 ? "flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow border border-gray-200 text-velvet-base truncate px-2 transition-all" : "flex-1 py-3 rounded-lg font-bold text-sm text-gray-400 hover:bg-gray-200 transition-all truncate px-2";
+            document.getElementById('btn-preneur-2').className = id === 2 ? "flex-1 py-3 rounded-lg font-bold text-sm bg-white shadow border border-gray-200 text-velvet-base truncate px-2 transition-all" : "flex-1 py-3 rounded-lg font-bold text-sm text-gray-400 hover:bg-gray-200 transition-all truncate px-2";
+            updatePreview();
+        }
+
+        function updateAtoutBase() {
+            const atout = document.getElementById('atout').value;
+            const disp = document.getElementById('card-values-display');
+            const baseInd = document.getElementById('base-indicator');
+            const btnCapot = document.getElementById('btn-capot');
+            
+            beloteCount1 = 0; 
+            beloteCount2 = 0;
+
+            if(atout === 'sa') {
+                disp.innerHTML = `<span><span class="text-white">SA :</span> As:19 | 10:10 | R:4 | D:3 | V:2</span>`;
+                baseInd.innerText = "Total dispo: 162";
+                btnCapot.setAttribute('onclick', 'setPoints(252)');
+            } else if (atout === 'ta') {
+                disp.innerHTML = `<span><span class="text-white">TA :</span> V:20 | 9:14 | As:11 | 10:10 | R:4 | D:3 <span class="text-velvet-light ml-2">(Converti sur 162)</span></span>`;
+                baseInd.innerText = "Total sur table: 258";
+                btnCapot.setAttribute('onclick', 'setPoints(252)'); 
+            } else {
+                disp.innerHTML = `<span><span class="text-white">ATOUT:</span> V:20 | 9:14 | As:11 | 10:10 | R:4 | D:3</span> <span class="mx-2 opacity-30">|</span> <span><span class="text-white">NORM:</span> As:11 | 10:10 | R:4 | D:3 | V:2</span>`;
+                baseInd.innerText = "Total dispo: 162";
+                btnCapot.setAttribute('onclick', 'setPoints(252)');
+            }
+            
+            document.getElementById('points-faits').value = ""; 
+            renderBeloteUI();
+            updatePreview();
+        }
+
+        function renderBeloteUI() {
+            const atout = document.getElementById('atout').value;
+            const container = document.getElementById('belote-ui');
+            
+            if (atout === 'sa') {
+                container.innerHTML = `<div class="text-center py-3 bg-gray-50 rounded-xl text-xs text-gray-400 font-mono border border-gray-200">Aucune belote possible en Sans Atout</div>`;
+            } else if (atout === 'ta') {
+                container.innerHTML = `
+                    <div class="flex gap-4">
+                        <div class="flex-1 flex items-center justify-between bg-gray-50 border border-gray-200 p-2 sm:p-3 rounded-xl gap-2 shadow-sm">
+                            <span class="text-xs font-bold text-gray-500 uppercase truncate">${teams[1]}</span>
+                            <input type="number" id="input-belote-1" placeholder="0" inputmode="numeric" pattern="[0-9]*" oninput="updateBeloteFromInput(1)" class="w-14 h-10 sm:h-12 text-center font-mono font-bold text-lg bg-white border-2 border-gray-200 rounded-lg outline-none focus:border-velvet-base text-velvet-dark placeholder-gray-300 transition-colors">
+                        </div>
+                        <div class="flex-1 flex items-center justify-between bg-gray-50 border border-gray-200 p-2 sm:p-3 rounded-xl gap-2 shadow-sm">
+                            <span class="text-xs font-bold text-gray-500 uppercase truncate">${teams[2]}</span>
+                            <input type="number" id="input-belote-2" placeholder="0" inputmode="numeric" pattern="[0-9]*" oninput="updateBeloteFromInput(2)" class="w-14 h-10 sm:h-12 text-center font-mono font-bold text-lg bg-white border-2 border-gray-200 rounded-lg outline-none focus:border-velvet-base text-velvet-dark placeholder-gray-300 transition-colors">
+                        </div>
+                    </div>
+                `;
+            } else {
+                let c0 = (beloteCount1===0 && beloteCount2===0) ? "bg-white shadow text-gray-600 border border-gray-200" : "text-gray-400 hover:bg-gray-200 border border-transparent";
+                let c1 = (beloteCount1===1) ? "bg-white shadow text-velvet-base border border-gray-200" : "text-gray-400 hover:bg-gray-200 border border-transparent";
+                let c2 = (beloteCount2===1) ? "bg-white shadow text-velvet-base border border-gray-200" : "text-gray-400 hover:bg-gray-200 border border-transparent";
+                
+                container.innerHTML = `
+                    <div class="flex bg-gray-100 p-1.5 rounded-xl gap-1">
+                        <button onclick="setClassicBelote(0)" class="flex-1 py-3 rounded-lg font-bold text-xs transition-all ${c0}">Aucune</button>
+                        <button onclick="setClassicBelote(1)" class="flex-1 py-3 rounded-lg font-bold text-xs transition-all truncate px-1 ${c1}">${teams[1]}</button>
+                        <button onclick="setClassicBelote(2)" class="flex-1 py-3 rounded-lg font-bold text-xs transition-all truncate px-1 ${c2}">${teams[2]}</button>
+                    </div>
+                `;
+            }
+        }
+
+        function updateBeloteFromInput(team) {
+            let input1 = document.getElementById('input-belote-1');
+            let input2 = document.getElementById('input-belote-2');
+            
+            let v1 = parseInt(input1.value);
+            let v2 = parseInt(input2.value);
+            
+            if (isNaN(v1)) v1 = 0;
+            if (isNaN(v2)) v2 = 0;
+
+            // Clamping the values logic
+            if (team === 1) {
+                if (v1 > 4) { v1 = 4; input1.value = 4; }
+                if (v1 + v2 > 4) { v2 = 4 - v1; input2.value = v2 === 0 ? "" : v2; }
+            } else {
+                if (v2 > 4) { v2 = 4; input2.value = 4; }
+                if (v1 + v2 > 4) { v1 = 4 - v2; input1.value = v1 === 0 ? "" : v1; }
+            }
+
+            beloteCount1 = Math.max(0, v1);
+            beloteCount2 = Math.max(0, v2);
+
+            updatePreview();
+        }
+
+        function setClassicBelote(team) {
+            beloteCount1 = team === 1 ? 1 : 0;
+            beloteCount2 = team === 2 ? 1 : 0;
+            renderBeloteUI();
+            updatePreview();
+        }
+
+        function adjustPoints(val) {
+            let input = document.getElementById('points-faits');
+            let maxPoints = (document.getElementById('atout').value === 'ta') ? 258 : 252;
+            let n = (parseInt(input.value) || 0) + val;
+            input.value = Math.max(0, Math.min(n, maxPoints));
+            updatePreview();
+        }
+
+        function setPoints(val) { document.getElementById('points-faits').value = val; updatePreview(); }
+
+        // --- MOTEUR DE SCORE FFB ---
+        function computeRound() {
+            const atout = document.getElementById('atout').value;
+            let maxPoints = atout === 'ta' ? 258 : 252;
+            
+            let ptsRaw = parseInt(document.getElementById('points-faits').value);
+            if (isNaN(ptsRaw)) ptsRaw = 0;
+            if (ptsRaw < 0) ptsRaw = 0;
+            if (ptsRaw > maxPoints) ptsRaw = maxPoints;
+            
+            let b1 = beloteCount1 * 20;
+            let b2 = beloteCount2 * 20;
+            let bPreneur = preneur === 1 ? b1 : b2;
+            let bDefense = preneur === 1 ? b2 : b1;
+
+            let pP = 0;
+            let pD = 0;
+
+            let isCapotPreneur = (ptsRaw >= 250); 
+            let isCapotDefense = (ptsRaw === 0);
+
+            if (atout === 'ta') {
+                if (isCapotPreneur) { pP = 252; pD = 0; }
+                else if (isCapotDefense) { pP = 0; pD = 252; }
+                else {
+                    pP = Math.round(ptsRaw * 162 / 258);
+                    pD = 162 - pP;
+                }
+            } else {
+                if (isCapotPreneur) { pP = 252; pD = 0; }
+                else if (isCapotDefense) { pP = 0; pD = 252; }
+                else {
+                    pP = ptsRaw;
+                    pD = 162 - ptsRaw;
+                }
+            }
+
+            let totalPreneur = pP + bPreneur;
+            let totalDefense = pD + bDefense;
+
+            let result = { 
+                pts1: 0, pts2: 0, 
+                reussi: false, litige: false, 
+                preneur: preneur, atout: atout, 
+                belote1: beloteCount1, belote2: beloteCount2,
+                litigeWon: 0, newLitige: 0, oldLitige: pendingLitige 
+            };
+
+            if (totalPreneur > totalDefense) {
+                // REUSSI
+                result.reussi = true;
+                result.pts1 = (preneur === 1 ? pP : pD) + b1;
+                result.pts2 = (preneur === 2 ? pP : pD) + b2;
+                
+                if (pendingLitige > 0) {
+                    result.litigeWon = pendingLitige;
+                    if(preneur === 1) result.pts1 += pendingLitige;
+                    else result.pts2 += pendingLitige;
+                }
+            } else if (totalPreneur < totalDefense) {
+                // CHUTE
+                result.reussi = false;
+                let baseChute = isCapotDefense ? 252 : 162;
+                
+                if (preneur === 1) {
+                    result.pts1 = b1; 
+                    result.pts2 = baseChute + b2; 
+                    if (pendingLitige > 0) { result.pts2 += pendingLitige; result.litigeWon = pendingLitige; }
+                } else {
+                    result.pts1 = baseChute + b1;
+                    result.pts2 = b2;
+                    if (pendingLitige > 0) { result.pts1 += pendingLitige; result.litigeWon = pendingLitige; }
+                }
+            } else {
+                // LITIGE
+                result.litige = true;
+                result.newLitige = pP; 
+                
+                if (preneur === 1) {
+                    result.pts1 = b1; 
+                    result.pts2 = pD + b2; 
+                } else {
+                    result.pts1 = pD + b1;
+                    result.pts2 = b2;
+                }
+            }
+
+            return result;
+        }
+
+        function updatePreview() {
+            const res = computeRound();
+            const p1 = document.getElementById('preview-t1');
+            const p2 = document.getElementById('preview-t2');
+            const st = document.getElementById('preview-status');
+            const atout = document.getElementById('atout').value;
+            const ptsRaw = document.getElementById('points-faits').value;
+
+            p1.innerText = `${teams[1]}: +${res.pts1}`;
+            p1.className = `truncate ${res.pts1 > res.pts2 ? "text-green-600" : "text-gray-400"}`;
+            
+            p2.innerText = `${teams[2]}: +${res.pts2}`;
+            p2.className = `truncate ${res.pts2 > res.pts1 ? "text-green-600" : "text-gray-400"}`;
+
+            let ext = "";
+            if (atout === 'ta' && ptsRaw > 0 && ptsRaw < 250) {
+                ext = ` (Conv. sur 162)`;
+            }
+
+            if(res.litige) { 
+                st.innerText = "LITIGE" + ext; 
+                st.className = "text-[10px] font-bold px-2 py-1 rounded bg-orange-100 text-orange-700 tracking-wider shrink-0"; 
+            } else if(res.reussi) { 
+                st.innerText = "PASSE" + ext; 
+                st.className = "text-[10px] font-bold px-2 py-1 rounded bg-green-100 text-green-700 tracking-wider shrink-0"; 
+            } else { 
+                st.innerText = "CHUTE" + ext; 
+                st.className = "text-[10px] font-bold px-2 py-1 rounded bg-red-100 text-red-700 tracking-wider shrink-0"; 
+            }
+        }
+
+        function calculateAndSave() {
+            const input = document.getElementById('points-faits').value;
+            if (input === "") return;
+
+            const res = computeRound();
+            history.push(res);
+            
+            scores[1] += res.pts1; 
+            scores[2] += res.pts2;
+            
+            if (res.litige) pendingLitige += res.newLitige;
+            else pendingLitige = 0; 
+            
+            updateUI(); 
+            resetForm();
+
+            if(scores[1] >= 1000 || scores[2] >= 1000) {
+                const w = scores[1] > scores[2] ? 1 : 2;
+                document.getElementById('victory-winner-name').innerText = teams[w];
+                document.getElementById('victory-winner-score').innerText = scores[w] + " pts";
+                document.getElementById('modal-victory').classList.remove('hidden');
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('score-total-1').innerText = scores[1];
+            document.getElementById('score-total-2').innerText = scores[2];
+            document.getElementById('round-counter').innerText = `Manche ${history.length + 1}`;
+
+            const litigeInd = document.getElementById('litige-indicator');
+            if (pendingLitige > 0) {
+                litigeInd.innerText = `Litige: +${pendingLitige}`;
+                litigeInd.classList.remove('hidden');
+            } else {
+                litigeInd.classList.add('hidden');
+            }
+
+            const tbody = document.getElementById('history-body');
+            const sym = { pique:'♠', coeur:'<span class="text-velvet-light">♥</span>', carreau:'<span class="text-velvet-light">♦</span>', trefle:'♣', sa:'SA', ta:'TA' };
+
+            tbody.innerHTML = history.slice().reverse().map((r) => {
+                const c1 = r.preneur === 1 ? "bg-gray-50 font-bold" : "";
+                const c2 = r.preneur === 2 ? "bg-gray-50 font-bold" : "";
+                
+                let bH = '';
+                let tags = [];
+                if(r.belote1 > 0) tags.push(`Belote${r.belote1>1?' x'+r.belote1:''} (${teams[1]})`);
+                if(r.belote2 > 0) tags.push(`Belote${r.belote2>1?' x'+r.belote2:''} (${teams[2]})`);
+                if(r.litige) tags.push(`Litige (+${r.newLitige})`);
+                if(r.litigeWon > 0) tags.push(`Gagne litige (+${r.litigeWon})`);
+
+                if(tags.length > 0) bH = `<div class="text-[9px] text-gray-400 mt-1 leading-tight font-sans truncate">${tags.join(' • ')}</div>`;
+
+                return `
+                <tr class="border-b border-gray-100 last:border-0">
+                    <td class="py-3 px-2 border-r border-gray-100 text-left pl-3 max-w-[150px] truncate">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-base font-bold ${r.reussi || r.litige ? 'text-velvet-dark' : 'text-red-500 line-through decoration-2'}">${sym[r.atout]}</span>
+                            <span class="text-[10px] text-gray-500 uppercase">${teams[r.preneur].substring(0,3)}</span>
+                        </div>${bH}
+                    </td>
+                    <td class="py-3 px-2 ${c1} text-velvet-base">+${r.pts1}</td>
+                    <td class="py-3 px-2 ${c2} text-velvet-base">+${r.pts2}</td>
+                </tr>`;
+            }).join('');
+
+            updateChart();
+        }
+
+        function resetForm() {
+            setPreneur(preneur === 1 ? 2 : 1);
+            document.getElementById('atout').value = "pique";
+            document.getElementById('points-faits').value = ""; 
+            beloteCount1 = 0; beloteCount2 = 0;
+            updateAtoutBase();
+        }
+
+        function undo() {
+            if(history.length === 0) return;
+            if(confirm("Annuler la dernière manche ?")) {
+                const last = history.pop();
+                scores[1] -= last.pts1; 
+                scores[2] -= last.pts2;
+                pendingLitige = last.oldLitige;
+
+                updateUI();
+                chart.data.labels.pop(); chart.data.datasets[0].data.pop(); chart.data.datasets[1].data.pop();
+                chart.update();
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: ['Début'], datasets: [
+                    { label: teams[1], data: [0], borderColor: '#701A26', backgroundColor: '#701A26', borderWidth: 2, tension: 0.1 },
+                    { label: teams[2], data: [0], borderColor: '#D4AF37', backgroundColor: '#D4AF37', borderWidth: 2, tension: 0.1 }
+                ]},
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter' } } } },
+                    scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
+                }
+            });
+        }
+
+        function updateChart() {
+            chart.data.labels.push(`M${history.length}`);
+            let t1 = 0, t2 = 0; const d1 = [0], d2 = [0];
+            history.forEach(h => { t1 += h.pts1; t2 += h.pts2; d1.push(t1); d2.push(t2); });
+            chart.data.datasets[0].data = d1; chart.data.datasets[0].label = teams[1];
+            chart.data.datasets[1].data = d2; chart.data.datasets[1].label = teams[2];
+            chart.update();
+        }
+    </script>
+</body>
+</html>
