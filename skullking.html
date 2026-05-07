@@ -168,37 +168,38 @@
             </button>
         </div>
 
-        <main class="max-w-7xl mx-auto p-4">
+        <main class="max-w-7xl mx-auto p-2 sm:p-4">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 ship-sway">
-                <div id="section-input" class="lg:col-span-2 space-y-6">
-                    <div id="phase-indicator" class="p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400">
+                <div id="section-input" class="lg:col-span-2 space-y-4">
+                    <div id="phase-indicator" class="p-3 rounded-2xl border text-center font-riuka text-xs sm:text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400">
                         PHASE DE PARIS
                     </div>
 
-                    <div class="bg-white/5 border border-white/10 rounded-3xl p-4 sm:p-8 shadow-2xl backdrop-blur-xl">
-                        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                            <div class="flex items-center gap-4">
-                                <h2 id="round-title" class="font-lacheyard text-4xl text-pirate-gold">Manche 1</h2>
-                                <div id="bid-status" class="hidden px-3 py-1 rounded font-mono text-xs font-bold border bg-orange-900/50 border-orange-500 text-orange-200"></div>
+                    <div class="bg-white/5 border border-white/10 rounded-3xl p-3 sm:p-8 shadow-2xl backdrop-blur-xl">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                            <div class="flex items-center gap-3">
+                                <h2 id="round-title" class="font-lacheyard text-3xl sm:text-4xl text-pirate-gold">Manche 1</h2>
+                                <div id="bid-status" class="hidden px-2 py-0.5 rounded font-mono text-[10px] font-bold border bg-orange-900/50 border-orange-500 text-orange-200"></div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button id="bonus-toggle" onclick="toggleBonusView()" class="hidden flex items-center gap-2 px-3 py-2 rounded-lg border font-riuka text-[10px] font-bold transition-all bg-white/5 text-pirate-gold border-white/10 hover:bg-white/10">
+                                <button id="bonus-toggle" onclick="toggleBonusView()" class="hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border font-riuka text-[9px] font-bold transition-all bg-white/5 text-pirate-gold border-white/10 hover:bg-white/10">
                                     Options Supplémentaires
                                 </button>
-                                <label class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
-                                    <span class="text-xl">🐙</span>
-                                    <span class="font-riuka text-xs text-pirate-gold font-bold">Kraken</span>
-                                    <input type="checkbox" id="kraken-played" class="w-5 h-5 accent-pirate-gold" onchange="updateBidStatus()">
+                                <label class="flex items-center gap-2 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
+                                    <span class="text-base">🐙</span>
+                                    <span class="font-riuka text-[9px] text-pirate-gold font-bold">Kraken</span>
+                                    <input type="checkbox" id="kraken-played" class="w-4 h-4 accent-pirate-gold" onchange="updateBidStatus()">
                                 </label>
                             </div>
                         </div>
 
-                        <div id="player-inputs" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                        <!-- 2 columns on mobile directly to reduce vertical height -->
+                        <div id="player-inputs" class="grid grid-cols-2 gap-2 sm:gap-4">
                             <!-- Input cards injected here -->
                         </div>
 
-                        <div class="mt-8">
-                            <button id="main-action-btn" onclick="nextPhase()" class="w-full py-5 bg-pirate-gold text-[#050a14] font-riuka text-sm font-bold rounded-2xl shadow-xl hover:scale-[1.01] active:scale-95 transition-all uppercase tracking-[4px]">
+                        <div class="mt-4 sm:mt-8">
+                            <button id="main-action-btn" onclick="nextPhase()" class="w-full py-4 sm:py-5 bg-pirate-gold text-[#050a14] font-riuka text-xs sm:text-sm font-bold rounded-2xl shadow-xl hover:scale-[1.01] active:scale-95 transition-all uppercase tracking-[3px] sm:tracking-[4px]">
                                 ⚓ Terminer les paris
                             </button>
                         </div>
@@ -207,7 +208,7 @@
 
                 <div id="section-stats" class="space-y-6 hidden lg:block">
                     <section class="bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl">
-                        <div class="bg-white/5 px-6 py-4 border-b border-white/10 font-riuka text-pirate-gold text-xs tracking-[4px] flex items-center gap-2">
+                        <div class="bg-white/5 px-6 py-3 border-b border-white/10 font-riuka text-pirate-gold text-xs tracking-[4px] flex items-center gap-2">
                             ⚔️ CLASSEMENT
                         </div>
                         <div id="scoreboard" class="divide-y divide-white/5">
@@ -265,11 +266,9 @@
 
         let currentRoundState = { bids: {}, won: {}, bonuses: {}, rascal: {} };
 
-        // Icons SVG pour les boutons - Meilleure lisibilité
-        const iconMinus = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>`;
-        const iconPlus = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
-        const iconMinusSm = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>`;
-        const iconPlusSm = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
+        // Icons SVG plus petits et légers pour mobile
+        const iconMinusSm = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>`;
+        const iconPlusSm = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
 
         function renderPlayerList() {
             const list = document.getElementById('player-list');
@@ -378,7 +377,6 @@
             phase = 'betting';
             showBonuses = false;
             
-            // Initialize round state
             currentRoundState = { bids: {}, won: {}, bonuses: {}, rascal: {} };
             players.forEach(p => {
                 currentRoundState.bids[p] = 0;
@@ -387,9 +385,8 @@
                 currentRoundState.rascal[p] = 0;
             });
 
-            // Reset UI cleanly for new games or replays
             document.getElementById('phase-indicator').innerText = 'PHASE DE PARIS';
-            document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400';
+            document.getElementById('phase-indicator').className = 'p-3 rounded-2xl border text-center font-riuka text-xs sm:text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400';
             document.getElementById('main-action-btn').innerText = '⚓ Terminer les paris';
             document.getElementById('main-action-btn').onclick = nextPhase;
             document.getElementById('main-action-btn').classList.remove('hidden');
@@ -399,7 +396,7 @@
             renderInputs();
             updateScoreboard();
             initChart();
-            updateHistory(); // clears history section
+            updateHistory();
             
             if (activeTab === 'input' && window.innerWidth < 1024) {
                 setActiveTab('input');
@@ -414,27 +411,21 @@
             }
         }
 
-        // Logic for Undo ⏪
         function undo() {
             if (phase === 'results') {
-                // If in results phase, just go back to betting phase of the same round
                 phase = 'betting';
                 document.getElementById('phase-indicator').innerText = 'PHASE DE PARIS';
-                document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400';
+                document.getElementById('phase-indicator').className = 'p-3 rounded-2xl border text-center font-riuka text-xs sm:text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400';
                 document.getElementById('bonus-toggle').classList.add('hidden');
                 document.getElementById('main-action-btn').innerText = '⚓ Terminer les paris';
                 document.getElementById('main-action-btn').onclick = nextPhase;
-                
                 showBonuses = false;
-                
                 renderInputs();
                 updateScorePreviews();
             } else if (phase === 'betting' && currentRound > 1) {
-                // If in betting phase and not round 1, go back to results phase of PREVIOUS round
                 if(confirm(`Revenir à la manche ${currentRound - 1} ? Les scores de cette manche seront ouverts à la correction.`)){
                     currentRound--;
                     
-                    // Reload state from previous round
                     let prevData = rounds[currentRound];
                     currentRoundState = { bids: {}, won: {}, bonuses: {}, rascal: {} };
                     players.forEach(p => {
@@ -444,14 +435,13 @@
                         currentRoundState.rascal[p] = prevData.details[p].rascal || 0;
                     });
                     
-                    // Remove the previous round from recorded history
                     delete rounds[currentRound];
                     
                     phase = 'results';
                     document.getElementById('phase-indicator').innerText = 'PHASE DE RÉSULTATS (CORRECTION)';
-                    document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-orange-500/10 border-orange-500/30 text-orange-400';
+                    document.getElementById('phase-indicator').className = 'p-3 rounded-2xl border text-center font-riuka text-xs sm:text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-orange-500/10 border-orange-500/30 text-orange-400';
                     document.getElementById('bonus-toggle').classList.remove('hidden');
-                    document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Options' : 'Options Supplémentaires';
+                    document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Options' : 'Options';
                     
                     document.getElementById('main-action-btn').innerText = '⚔️ Valider la manche';
                     document.getElementById('main-action-btn').onclick = validateRound;
@@ -470,7 +460,6 @@
             document.getElementById('round-indicator').innerText = `Manche ${currentRound}`;
             document.getElementById('round-title').innerText = `Manche ${currentRound}`;
             
-            // Handle Undo Button status
             const undoBtn = document.getElementById('btn-undo');
             if (undoBtn) {
                 if (currentRound === 1 && phase === 'betting') {
@@ -485,64 +474,72 @@
                 const bid = currentRoundState.bids[p] || 0;
                 const won = currentRoundState.won[p] || 0;
                 const rascalBet = currentRoundState.rascal[p] || 0;
+                const playerColor = COLORS[i % COLORS.length];
 
                 return `
-                    <div class="bg-white/5 border ${isStarter ? 'border-pirate-gold/40 shadow-[0_0_20px_rgba(255,215,0,0.1)]' : 'border-white/5'} rounded-2xl p-4 sm:p-6 transition-all backdrop-blur-sm">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-white/5 pb-2 gap-2">
-                            <div class="flex items-center justify-between w-full min-w-0 gap-3">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <h3 class="font-riuka text-lg text-white font-semibold truncate">${p}</h3>
-                                    ${isStarter ? '<span class="bg-pirate-gold text-[#050a14] text-[8px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest shrink-0">Premier</span>' : ''}
-                                </div>
-                                <div id="score-preview-${p}" class="font-mono text-xs font-bold text-pirate-gold bg-white/5 px-2 py-1 rounded-lg border border-pirate-gold/20">
-                                    +0
-                                </div>
+                    <div class="bg-[#131d31]/80 border ${isStarter ? 'border-pirate-gold/50 shadow-[0_0_15px_rgba(255,215,0,0.15)]' : 'border-white/10'} rounded-2xl p-2.5 sm:p-4 transition-all backdrop-blur-sm relative overflow-hidden">
+                        
+                        <!-- Header de carte compact avec Couleur Joueur -->
+                        <div class="flex items-center justify-between gap-1.5 mb-2.5 border-b border-white/5 pb-1.5">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${playerColor}; box-shadow: 0 0 8px ${playerColor}80;"></span>
+                                <h3 class="font-riuka text-xs sm:text-sm text-white font-bold truncate leading-tight">${p}</h3>
+                                ${isStarter ? '<span class="bg-pirate-gold text-[#050a14] text-[7px] px-1 py-0.2 rounded font-extrabold uppercase shrink-0">1er</span>' : ''}
+                            </div>
+                            <div id="score-preview-${p}" class="font-mono text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded border text-pirate-gold border-pirate-gold/20 bg-white/5 shrink-0">
+                                +0
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label class="text-[9px] font-riuka text-white/30 uppercase tracking-widest">Pari</label>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="adjustVal('${p}', 'bid', -1)" ${phase === 'results' ? 'disabled' : ''} class="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 active:scale-90 transition-all disabled:opacity-20 text-white shadow-sm">${iconMinus}</button>
-                                    <input type="number" inputmode="numeric" pattern="[0-9]* "id="bid-${p}" ${phase === 'results' ? 'disabled' : ''} class="w-full h-10 bg-white/10 border border-white/10 rounded-xl px-1 text-white font-bold text-center text-sm outline-none focus:border-pirate-gold/30 disabled:opacity-50" placeholder="0" onchange="currentRoundState.bids['${p}'] = parseInt(this.value) || 0; updateBidStatus(); updateScorePreviews();">
-                                    <button onclick="adjustVal('${p}', 'bid', 1)" ${phase === 'results' ? 'disabled' : ''} class="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 active:scale-90 transition-all disabled:opacity-20 text-white shadow-sm">${iconPlus}</button>
-                                </div>
-                            </div>
-                            <div class="${phase === 'betting' ? 'hidden' : ''} space-y-2">
-                                <label class="text-[9px] font-riuka text-white/30 uppercase tracking-widest">Fait</label>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="adjustVal('${p}', 'won', -1)" class="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 active:scale-90 transition-all text-white shadow-sm">${iconMinus}</button>
-                                    <input type="number" inputmode="numeric" pattern="[0-9]* "id="won-${p}" class="w-full h-10 bg-white/10 border border-white/10 rounded-xl px-1 text-white font-bold text-center text-sm outline-none focus:border-pirate-gold/30" placeholder="0" onchange="currentRoundState.won['${p}'] = parseInt(this.value) || 0; updateScorePreviews();">
-                                    <button onclick="adjustVal('${p}', 'won', 1)" class="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 active:scale-90 transition-all text-white shadow-sm">${iconPlus}</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="bonus-area-${p}" class="${phase === 'results' && showBonuses ? '' : 'hidden'} mt-3 pt-2 border-t border-pirate-gold/10">
+
+                        <!-- Grid adaptative : 1 seule colonne pendant les paris, 2 colonnes pendant les résultats -->
+                        <div class="grid ${phase === 'betting' ? 'grid-cols-1' : 'grid-cols-2'} gap-1.5 sm:gap-3">
                             
-                            <div class="grid grid-cols-1 gap-y-2">
+                            <!-- Pari -->
+                            <div class="space-y-1">
+                                <label class="text-[8px] sm:text-[9px] font-riuka text-white/40 uppercase tracking-wider block text-center">Pari</label>
+                                <div class="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg p-0.5">
+                                    <button onclick="adjustVal('${p}', 'bid', -1)" ${phase === 'results' ? 'disabled' : ''} class="w-6 h-6 sm:w-8 sm:h-8 bg-white/5 hover:bg-white/10 rounded-md flex items-center justify-center transition-all disabled:opacity-20 text-white shrink-0">${iconMinusSm}</button>
+                                    <input type="number" inputmode="numeric" pattern="[0-9]*" id="bid-${p}" value="${bid === 0 ? '' : bid}" ${phase === 'results' ? 'disabled' : ''} class="w-full text-center bg-transparent text-xs sm:text-sm font-bold text-white outline-none min-w-0 disabled:opacity-50" placeholder="0" onchange="currentRoundState.bids['${p}'] = parseInt(this.value) || 0; updateBidStatus(); updateScorePreviews();">
+                                    <button onclick="adjustVal('${p}', 'bid', 1)" ${phase === 'results' ? 'disabled' : ''} class="w-6 h-6 sm:w-8 sm:h-8 bg-white/5 hover:bg-white/10 rounded-md flex items-center justify-center transition-all disabled:opacity-20 text-white shrink-0">${iconPlusSm}</button>
+                                </div>
+                            </div>
+
+                            <!-- Fait -->
+                            <div class="${phase === 'betting' ? 'hidden' : ''} space-y-1">
+                                <label class="text-[8px] sm:text-[9px] font-riuka text-white/40 uppercase tracking-wider block text-center">Fait</label>
+                                <div class="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg p-0.5">
+                                    <button onclick="adjustVal('${p}', 'won', -1)" class="w-6 h-6 sm:w-8 sm:h-8 bg-white/5 hover:bg-white/10 rounded-md flex items-center justify-center transition-all text-white shrink-0">${iconMinusSm}</button>
+                                    <input type="number" inputmode="numeric" pattern="[0-9]*" id="won-${p}" value="${won === 0 ? '' : won}" class="w-full text-center bg-transparent text-xs sm:text-sm font-bold text-white outline-none min-w-0" placeholder="0" onchange="currentRoundState.won['${p}'] = parseInt(this.value) || 0; updateScorePreviews();">
+                                    <button onclick="adjustVal('${p}', 'won', 1)" class="w-6 h-6 sm:w-8 sm:h-8 bg-white/5 hover:bg-white/10 rounded-md flex items-center justify-center transition-all text-white shrink-0">${iconPlusSm}</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Zone de bonus optimisée pour mobile -->
+                        <div id="bonus-area-${p}" class="${phase === 'results' && showBonuses ? '' : 'hidden'} mt-2.5 pt-2 border-t border-pirate-gold/10">
+                            <div class="grid grid-cols-1 gap-y-1.5">
                                 ${renderBonusRow(p, 'cards14', `Cartes 14 (+${CONFIG.bonusC14})`)}
                                 ${renderBonusRow(p, 'mermaidPirate', `Sirène/Pirate (+${CONFIG.bonusSP})`)}
                                 ${renderBonusRow(p, 'pirateSK', `Pirate/SK (+${CONFIG.bonusPSK})`)}
                                 ${renderBonusRow(p, 'skMermaid', `SK/Sirène (+${CONFIG.bonusSKS})`)}
                             </div>
 
-                            <!-- Pouvoirs Avancés -->
-                            <div class="mt-4 mb-2 text-[9px] font-riuka text-pirate-gold uppercase tracking-widest border-b border-pirate-gold/20 pb-1">Pouvoirs & Ajustements</div>
+                            <div class="mt-2.5 mb-1.5 text-[8px] font-riuka text-pirate-gold uppercase tracking-wider border-b border-pirate-gold/20 pb-0.5">Pouvoirs</div>
                             
-                            <div class="flex items-center justify-between gap-2 mb-2">
-                                <label class="text-[8px] font-riuka text-white/30 uppercase tracking-widest truncate">Rascal (Pari)</label>
-                                <div class="flex items-center gap-1.5">
-                                    <button id="rascal-btn-${p}-0" onclick="setRascal('${p}', 0)" class="w-8 h-7 text-xs rounded transition-all ${rascalBet === 0 ? 'bg-pirate-gold text-black font-bold shadow-[0_0_10px_rgba(255,215,0,0.3)]' : 'bg-white/10 border border-white/20 text-white/90 hover:bg-white/20'}">0</button>
-                                    <button id="rascal-btn-${p}-10" onclick="setRascal('${p}', 10)" class="w-8 h-7 text-xs rounded transition-all ${rascalBet === 10 ? 'bg-pirate-gold text-black font-bold shadow-[0_0_10px_rgba(255,215,0,0.3)]' : 'bg-white/10 border border-white/20 text-white/90 hover:bg-white/20'}">10</button>
-                                    <button id="rascal-btn-${p}-20" onclick="setRascal('${p}', 20)" class="w-8 h-7 text-xs rounded transition-all ${rascalBet === 20 ? 'bg-pirate-gold text-black font-bold shadow-[0_0_10px_rgba(255,215,0,0.3)]' : 'bg-white/10 border border-white/20 text-white/90 hover:bg-white/20'}">20</button>
+                            <div class="flex items-center justify-between gap-1 mb-1.5">
+                                <label class="text-[7.5px] sm:text-[8px] font-riuka text-white/40 uppercase tracking-wider truncate">Rascal</label>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <button id="rascal-btn-${p}-0" onclick="setRascal('${p}', 0)" class="w-6 h-5 sm:w-8 sm:h-7 text-[10px] rounded transition-all ${rascalBet === 0 ? 'bg-pirate-gold text-black font-extrabold shadow-[0_0_10px_rgba(255,215,0,0.3)]' : 'bg-white/10 border border-white/20 text-white/90 hover:bg-white/20'}">0</button>
+                                    <button id="rascal-btn-${p}-10" onclick="setRascal('${p}', 10)" class="w-6 h-5 sm:w-8 sm:h-7 text-[10px] rounded transition-all ${rascalBet === 10 ? 'bg-pirate-gold text-black font-extrabold shadow-[0_0_10px_rgba(255,215,0,0.3)]' : 'bg-white/10 border border-white/20 text-white/90 hover:bg-white/20'}">10</button>
+                                    <button id="rascal-btn-${p}-20" onclick="setRascal('${p}', 20)" class="w-6 h-5 sm:w-8 sm:h-7 text-[10px] rounded transition-all ${rascalBet === 20 ? 'bg-pirate-gold text-black font-extrabold shadow-[0_0_10px_rgba(255,215,0,0.3)]' : 'bg-white/10 border border-white/20 text-white/90 hover:bg-white/20'}">20</button>
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-between gap-2">
-                                <label class="text-[8px] font-riuka text-white/30 uppercase tracking-widest truncate">Ajuster Pari (Harry)</label>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="adjustVal('${p}', 'bid', -1)" class="w-7 h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all text-white shadow-sm">${iconMinusSm}</button>
-                                    <button onclick="adjustVal('${p}', 'bid', 1)" class="w-7 h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all text-white shadow-sm">${iconPlusSm}</button>
+                            <div class="flex items-center justify-between gap-1">
+                                <label class="text-[7.5px] sm:text-[8px] font-riuka text-white/40 uppercase tracking-wider truncate">Harry (Pari)</label>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <button onclick="adjustVal('${p}', 'bid', -1)" class="w-5.5 h-5.5 sm:w-7 sm:h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-md hover:bg-white/20 transition-all text-white shadow-sm">${iconMinusSm}</button>
+                                    <button onclick="adjustVal('${p}', 'bid', 1)" class="w-5.5 h-5.5 sm:w-7 sm:h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-md hover:bg-white/20 transition-all text-white shadow-sm">${iconPlusSm}</button>
                                 </div>
                             </div>
                         </div>
@@ -556,12 +553,12 @@
         function renderBonusRow(player, key, label) {
             const val = currentRoundState.bonuses[player] ? currentRoundState.bonuses[player][key] : 0;
             return `
-                <div class="flex items-center justify-between gap-2">
-                    <label class="text-[8px] font-riuka text-white/30 uppercase tracking-widest leading-none truncate">${label}</label>
-                    <div class="flex items-center gap-2">
-                        <button onclick="adjustBonus('${player}', '${key}', -1)" class="w-7 h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 text-white shadow-sm">${iconMinusSm}</button>
-                        <span id="bonus-${player}-${key}" class="font-mono text-sm text-pirate-gold font-bold min-w-[20px] text-center">${val}</span>
-                        <button onclick="adjustBonus('${player}', '${key}', 1)" class="w-7 h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 text-white shadow-sm">${iconPlusSm}</button>
+                <div class="flex items-center justify-between gap-1">
+                    <label class="text-[7.5px] sm:text-[8px] font-riuka text-white/40 uppercase tracking-wider leading-none truncate max-w-[70%]">${label}</label>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="adjustBonus('${player}', '${key}', -1)" class="w-5.5 h-5.5 sm:w-7 sm:h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-md hover:bg-white/20 text-white shadow-sm">${iconMinusSm}</button>
+                        <span id="bonus-${player}-${key}" class="font-mono text-xs sm:text-sm text-pirate-gold font-bold min-w-[14px] text-center">${val}</span>
+                        <button onclick="adjustBonus('${player}', '${key}', 1)" class="w-5.5 h-5.5 sm:w-7 sm:h-7 flex items-center justify-center bg-white/10 border border-white/20 rounded-md hover:bg-white/20 text-white shadow-sm">${iconPlusSm}</button>
                     </div>
                 </div>
             `;
@@ -571,14 +568,13 @@
             if (!currentRoundState.rascal) currentRoundState.rascal = {};
             currentRoundState.rascal[player] = value;
             
-            // Mettre à jour visuellement les boutons sans recharger tout l'affichage
             [0, 10, 20].forEach(val => {
                 const btn = document.getElementById(`rascal-btn-${player}-${val}`);
                 if (btn) {
                     if (val === value) {
-                        btn.className = "w-8 h-7 text-xs rounded transition-all bg-pirate-gold text-black font-bold shadow-[0_0_10px_rgba(255,215,0,0.3)]";
+                        btn.className = "w-6 h-5 sm:w-8 sm:h-7 text-[10px] rounded transition-all bg-pirate-gold text-black font-extrabold shadow-[0_0_10px_rgba(255,215,0,0.3)]";
                     } else {
-                        btn.className = "w-8 h-7 text-xs rounded transition-all bg-white/10 border border-white/20 text-white/90 hover:bg-white/20";
+                        btn.className = "w-6 h-5 sm:w-8 sm:h-7 text-[10px] rounded transition-all bg-white/10 border border-white/20 text-white/90 hover:bg-white/20";
                     }
                 }
             });
@@ -588,11 +584,9 @@
 
         function adjustVal(player, type, val) {
             const input = document.getElementById(`${type}-${player}`);
-            // On récupère la valeur actuelle, si vide on prend 0
             let currentVal = parseInt(input.value) || 0;
             const newVal = Math.max(0, currentVal + val);
             
-            // Si la nouvelle valeur est 0, on vide le champ pour voir le placeholder
             input.value = (newVal === 0) ? '' : newVal;
             
             if (type === 'bid') {
@@ -634,17 +628,17 @@
                 let score = 0;
                 if (bid === won) {
                     score = bid === 0 ? currentRound * 10 : bid * 20;
-                    score += rascalBet; // Victoire du pari Rascal
+                    score += rascalBet;
                 } else {
                     score = bid === 0 ? -currentRound * 10 : -Math.abs(bid - won) * 10;
-                    score -= rascalBet; // Défaite du pari Rascal
+                    score -= rascalBet;
                 }
                 score += bonus;
 
                 const preview = document.getElementById(`score-preview-${p}`);
                 if (preview) {
                     preview.innerText = (score >= 0 ? '+' : '') + score;
-                    preview.className = `font-mono text-xs font-bold px-2 py-1 rounded-lg border transition-all ${
+                    preview.className = `font-mono text-[10px] sm:text-xs font-bold px-1.5 py-0.5 rounded border transition-all ${
                         score > 0 ? 'text-green-400 border-green-500/30 bg-green-500/5' : 
                         score < 0 ? 'text-pirate-red border-pirate-red/30 bg-pirate-red/5' : 
                         'text-pirate-gold border-pirate-gold/30 bg-pirate-gold/5'
@@ -662,7 +656,7 @@
             } else {
                 badge.classList.remove('hidden');
                 badge.innerText = `${diff > 0 ? 'OVERBID' : 'UNDERBID'} de ${Math.abs(diff)}`;
-                badge.className = `px-3 py-1 rounded font-mono text-xs font-bold border ${diff > 0 ? 'bg-orange-900/50 border-orange-500 text-orange-200' : 'bg-yellow-900/50 border-yellow-500 text-yellow-200'}`;
+                badge.className = `px-2 py-0.5 rounded font-mono text-[10px] font-bold border ${diff > 0 ? 'bg-orange-900/50 border-orange-500 text-orange-200' : 'bg-yellow-900/50 border-yellow-500 text-yellow-200'}`;
             }
         }
 
@@ -670,9 +664,9 @@
             if (phase === 'betting') {
                 phase = 'results';
                 document.getElementById('phase-indicator').innerText = 'PHASE DE RÉSULTATS';
-                document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-pirate-red/10 border-pirate-red/30 text-pirate-red';
+                document.getElementById('phase-indicator').className = 'p-3 rounded-2xl border text-center font-riuka text-xs sm:text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-pirate-red/10 border-pirate-red/30 text-pirate-red';
                 document.getElementById('bonus-toggle').classList.remove('hidden');
-                document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Options' : 'Options Supplémentaires';
+                document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Options' : 'Options';
                 document.getElementById('main-action-btn').innerText = '⚔️ Valider la manche';
                 document.getElementById('main-action-btn').onclick = validateRound;
                 renderInputs();
@@ -729,7 +723,6 @@
                 phase = 'betting';
                 showBonuses = false;
                 
-                // Reset round state
                 currentRoundState = { bids: {}, won: {}, bonuses: {}, rascal: {} };
                 players.forEach(p => {
                     currentRoundState.bids[p] = 0;
@@ -739,7 +732,7 @@
                 });
 
                 document.getElementById('phase-indicator').innerText = 'PHASE DE PARIS';
-                document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400';
+                document.getElementById('phase-indicator').className = 'p-3 rounded-2xl border text-center font-riuka text-xs sm:text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-green-500/10 border-green-500/30 text-green-400';
                 document.getElementById('bonus-toggle').classList.add('hidden');
                 document.getElementById('main-action-btn').innerText = '⚓ Terminer les paris';
                 document.getElementById('main-action-btn').onclick = nextPhase;
@@ -759,16 +752,15 @@
                 updateHistory();
                 
                 document.getElementById('phase-indicator').innerText = 'PARTIE TERMINÉE';
-                document.getElementById('phase-indicator').className = 'p-4 rounded-2xl border text-center font-riuka text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-pirate-gold/10 border-pirate-gold/30 text-pirate-gold';
+                document.getElementById('phase-indicator').className = 'p-3 rounded-2xl border text-center font-riuka text-xs sm:text-sm font-bold tracking-[4px] shadow-2xl transition-all backdrop-blur-md bg-pirate-gold/10 border-pirate-gold/30 text-pirate-gold';
                 
-                // Transformation du bouton principal pour Rejouer directement
                 const mainBtn = document.getElementById('main-action-btn');
-                mainBtn.innerText = '🏴‍☠️ Rejouer avec le même équipage';
+                mainBtn.innerText = '🏴‍☠️ Rejouer';
                 mainBtn.onclick = startGame;
                 mainBtn.classList.remove('hidden');
 
                 document.getElementById('bonus-toggle').classList.add('hidden');
-                document.getElementById('player-inputs').innerHTML = ''; // Cacher les inputs
+                document.getElementById('player-inputs').innerHTML = '';
                 
                 if (activeTab === 'input' && window.innerWidth < 1024) {
                     setActiveTab('stats');
@@ -780,7 +772,7 @@
 
         function toggleBonusView() {
             showBonuses = !showBonuses;
-            document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Options' : 'Options Supplémentaires';
+            document.getElementById('bonus-toggle').innerText = showBonuses ? 'Cacher Options' : 'Options';
             players.forEach(p => {
                 const area = document.getElementById(`bonus-area-${p}`);
                 if (showBonuses) area.classList.remove('hidden');
@@ -790,24 +782,38 @@
 
         function updateScoreboard() {
             const scoreboard = document.getElementById('scoreboard');
-            const totals = players.map(p => {
+            let totals = players.map(p => {
                 let total = 0;
                 Object.values(rounds).forEach(r => total += (r.scores ? r.scores[p] : r[p]) || 0);
                 return { name: p, total };
             });
-            const maxTotal = Math.max(...totals.map(t => t.total));
 
-            scoreboard.innerHTML = totals.map((t, i) => `
-                <div class="flex items-center justify-between px-6 py-5 ${t.total === maxTotal && Object.keys(rounds).length > 0 ? 'bg-pirate-gold/5' : ''}">
-                    <div class="flex items-center gap-4">
-                        <span class="font-riuka text-white/20 w-4 text-xs">0${i + 1}</span>
-                        <span class="font-medium text-sm text-white/80">${t.name}</span>
+            // TRIER par score décroissant (n°1 au dernier)
+            totals.sort((a, b) => b.total - a.total);
+            const maxTotal = totals.length > 0 ? totals[0].total : 0;
+
+            scoreboard.innerHTML = totals.map((t, i) => {
+                const originalIndex = players.indexOf(t.name);
+                const playerColor = COLORS[originalIndex % COLORS.length];
+                // Afficher le trophée uniquement s'il y a déjà eu au moins 1 manche jouée et que le score est le score max
+                const isWinner = (t.total === maxTotal && Object.keys(rounds).length > 0);
+
+                return `
+                <div class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-5 transition-all ${isWinner ? 'bg-pirate-gold/10 border-l-2 border-pirate-gold' : 'border-l-2 border-transparent'}">
+                    <div class="flex items-center gap-3">
+                        <span class="font-riuka text-white/20 w-4 text-xs text-center">0${i + 1}</span>
+                        <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${playerColor}; box-shadow: 0 0 8px ${playerColor}80;"></span>
+                        <span class="font-medium text-xs sm:text-sm ${isWinner ? 'text-pirate-gold font-bold' : 'text-white/80'}">
+                            ${t.name}
+                            ${isWinner ? '<span class="ml-1 text-base drop-shadow-[0_0_8px_rgba(255,215,0,0.8)]" title="Vainqueur Actuel">🏆</span>' : ''}
+                        </span>
                     </div>
-                    <div class="font-mono text-2xl font-bold ${t.total >= 0 ? 'text-green-400' : 'text-pirate-red'}">
+                    <div class="font-mono text-xl sm:text-2xl font-bold ${t.total >= 0 ? 'text-green-400' : 'text-pirate-red'}">
                         ${t.total}
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function initChart() {
@@ -870,16 +876,20 @@
             
             historySection.classList.remove('hidden');
             
-            // Update headers
             headerRow.innerHTML = `
-                <th class="p-2 font-riuka text-[8px] tracking-widest text-white/40">#</th>
-            ` + players.map(p => `
-                <th class="p-2 font-riuka text-[7px] tracking-widest text-white/60 border-l border-white/10 truncate">
-                    ${p.toUpperCase()}
+                <th class="p-2 font-riuka text-[8px] tracking-widest text-white/40 border-b border-white/10">#</th>
+            ` + players.map((p, i) => {
+                const playerColor = COLORS[i % COLORS.length];
+                return `
+                <th class="p-2 font-riuka text-[7px] tracking-widest text-white/60 border-l border-white/10 truncate border-b" style="border-bottom-color: ${playerColor}aa;">
+                    <div class="flex items-center justify-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full inline-block" style="background-color: ${playerColor};"></span>
+                        ${p.toUpperCase()}
+                    </div>
                 </th>
-            `).join('');
+                `;
+            }).join('');
 
-            // Update body
             historyBody.innerHTML = Object.entries(rounds).map(([rIndex, rData]) => `
                 <tr class="border-b border-white/5">
                     <td class="p-2 font-mono text-pirate-gold text-[10px] bg-white/5">${rIndex}</td>
@@ -890,15 +900,15 @@
                             <td class="p-2 border-l border-white/5">
                                 <div class="flex flex-col gap-1">
                                     <div class="flex items-center justify-between gap-1">
-                                        <span class="text-[8px] opacity-40">Pari: ${d.bid}</span>
-                                        <span class="text-[8px] opacity-40">Fait: ${d.won}</span>
+                                        <span class="text-[8px] opacity-40">P: ${d.bid}</span>
+                                        <span class="text-[8px] opacity-40">F: ${d.won}</span>
                                     </div>
                                     <div class="flex flex-wrap gap-1 justify-center">
                                         ${d.bonusDetails.cards14 > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.cards14 * CONFIG.bonusC14}</span>` : ''}
                                         ${d.bonusDetails.mermaidPirate > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.mermaidPirate * CONFIG.bonusSP}</span>` : ''}
                                         ${d.bonusDetails.pirateSK > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.pirateSK * CONFIG.bonusPSK}</span>` : ''}
                                         ${d.bonusDetails.skMermaid > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] text-pirate-gold">+${d.bonusDetails.skMermaid * CONFIG.bonusSKS}</span>` : ''}
-                                        ${d.rascal > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] ${d.bid === d.won ? 'text-green-400' : 'text-pirate-red'} font-bold">RASCAL: ${d.rascal}</span>` : ''}
+                                        ${d.rascal > 0 ? `<span class="bg-white/10 px-1 rounded text-[7px] ${d.bid === d.won ? 'text-green-400' : 'text-pirate-red'} font-bold">R: ${d.rascal}</span>` : ''}
                                     </div>
                                     <div class="font-mono text-[11px] ${s >= 0 ? 'text-green-400' : 'text-pirate-red'} font-bold">
                                         ${s > 0 ? '+' : ''}${s}
